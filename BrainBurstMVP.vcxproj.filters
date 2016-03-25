@@ -50,7 +50,7 @@
     <ClInclude Include="include\Enemy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Entity.h">
+    <ClInclude Include="include\IEntity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
