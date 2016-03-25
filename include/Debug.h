@@ -12,6 +12,7 @@ namespace bb {
         void addLine(std::string text);
         void draw(sf::RenderWindow& window);
         void toggle();
+        bool isDebug();
     private:
         bool m_shown;
         sf::Text m_text;

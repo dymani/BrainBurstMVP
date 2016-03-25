@@ -11,8 +11,11 @@ namespace bb {
     public:
         Physics(World& world);
         void update(std::map<int, Entity*>& entities);
+        void drawHitboxes(sf::RenderWindow& window, std::map<int, Entity*>& entities);
     private:
         World& m_world;
+        sf::FloatRect getHitbox(Entity* entity);
+        sf::RectangleShape m_hitboxSprite;
     };
 }
 

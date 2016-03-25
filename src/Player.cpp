@@ -27,9 +27,11 @@ namespace bb {
         m_isSprinting = keySprint;
         float speed;
         if(m_isDodging) {
+            m_hitbox = {0.0F, 0.0F, 64.F, 44.8F};
             speed = 0.05F;
             m_isSprinting = false;
         } else {
+            m_hitbox = {0.0F, 0.0F, 64.0F, 64.0F};
             if(m_sprint <= 0)
                 m_isSprinting = false;
             if(m_isSprinting)
@@ -101,7 +103,10 @@ namespace bb {
             m_isOnGround = true;
         }
         debug.addLine("Double jump: " + std::string(m_doubleJump ? "True" : "False"));
-        debug.addLine((m_isSprinting ? "Spriting:     " : "Not sprinting: ") + std::to_string(m_sprint));
+        if(m_isSprinting)
+            debug.addLine("Spriting              Time: " + std::to_string(m_sprint));
+        else
+            debug.addLine("Not sprinting   Time: " + std::to_string(m_sprint));
         debug.addLine(m_isDodging ? "Dodging" : "Not dodging");
     }
 

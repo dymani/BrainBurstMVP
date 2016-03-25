@@ -8,15 +8,15 @@ namespace bb {
         m_player->setCoord(5, 0);
         m_entities[0] = m_player;
         auto* enemy = new Enemy(*this);
-        enemy->setCoord(7, 2);
+        enemy->setCoord(7, 4);
         m_entities[1] = enemy;
 
-        enemy = new Enemy(*this);
+        /*enemy = new Enemy(*this);
         enemy->setCoord(7, 1);
-        m_entities[2] = enemy;
+        m_entities[2] = enemy;*/
 
         enemy = new Enemy(*this);
-        enemy->setCoord(7, 0);
+        enemy->setCoord(7, 0.71F);
         m_entities[3] = enemy;
     }
 
@@ -49,6 +49,7 @@ namespace bb {
         for(auto entity : m_entities) {
             entity.second->draw(window, dt);
         }
+        if(m_debug.isDebug()) m_physics.drawHitboxes(window, m_entities);
         m_debug.draw(window);
     }
 

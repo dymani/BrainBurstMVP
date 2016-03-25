@@ -4,6 +4,9 @@
 
 namespace bb {
     Physics::Physics(World& world) : m_world(world) {
+        m_hitboxSprite.setFillColor(sf::Color::Transparent);
+        m_hitboxSprite.setOutlineColor(sf::Color::Magenta);
+        m_hitboxSprite.setOutlineThickness(1.0F);
     }
 
     void Physics::update(std::map<int, Entity*>& entities) {
@@ -33,8 +36,7 @@ namespace bb {
                     eA->m_isOnGround = true;
                 }
             }
-            sf::FloatRect hitboxA = {64 * newCoord.x + eA->m_hitbox.left, 540 - 64 * newCoord.y
-                - eA->m_hitbox.top - eA->m_hitbox.height, eA->m_hitbox.width, eA->m_hitbox.height};
+            sf::FloatRect hitboxA = getHitbox(eA);
             m_world.getDebug().addLine(std::to_string(entityA.first) + ": " + std::to_string(hitboxA.left)
                 + " " + std::to_string(hitboxA.top) + " " + std::to_string(hitboxA.width)
                 + " " + std::to_string(hitboxA.height));
@@ -42,8 +44,7 @@ namespace bb {
             for(auto& entityB : entities) {
                 if(entityA.first == entityB.first) continue;
                 auto* eB = entityB.second;
-                sf::FloatRect hitboxB = {64 * eB->m_coord.x + eB->m_hitbox.left, 540 - 64 * eB->m_coord.y
-                    - eB->m_hitbox.top - eB->m_hitbox.height, eB->m_hitbox.width, eB->m_hitbox.height};
+                sf::FloatRect hitboxB = getHitbox(eB);
                 if(!(hitboxA.intersects(hitboxB))) continue;
 
                 float bottomA = hitboxA.top + hitboxA.height;
@@ -77,5 +78,20 @@ namespace bb {
             }
             eA->m_coord = newCoord;
         }
+    }
+
+    void Physics::drawHitboxes(sf::RenderWindow& window, std::map<int, Entity*>& entities) {
+        for(auto& entity : entities) {
+            auto* e = entity.second;
+            auto hitbox = getHitbox(e);
+            m_hitboxSprite.setPosition({hitbox.left, hitbox.top});
+            m_hitboxSprite.setSize({hitbox.width, hitbox.height});
+            window.draw(m_hitboxSprite);
+        }
+    }
+
+    sf::FloatRect Physics::getHitbox(Entity * e) {
+        return  {64 * e->m_coord.x + e->m_hitbox.left, 540 - 64 * e->m_coord.y
+            - e->m_hitbox.top - e->m_hitbox.height, e->m_hitbox.width, e->m_hitbox.height};
     }
 }

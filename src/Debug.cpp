@@ -9,7 +9,7 @@ namespace bb {
         m_text.setFont(font);
         m_text.setCharacterSize(15);
         m_text.setColor(sf::Color::White);
-        m_text.setPosition({10.0F, 0.0F});
+        m_text.setPosition({10.0F, -10.0F});
         reset();
     }
 
@@ -27,5 +27,9 @@ namespace bb {
 
     void Debug::toggle() {
         m_shown = !m_shown;
+    }
+
+    bool Debug::isDebug() {
+        return m_shown;
     }
 }
