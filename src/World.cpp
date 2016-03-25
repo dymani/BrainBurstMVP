@@ -1,15 +1,23 @@
 #include "World.h"
 
 namespace bb {
-    World::World() {
+    World::World() : m_physics(*this) {
         m_font.loadFromFile("assets/system.otf");
         m_debug.init(m_font);
         m_player = new Player(*this);
         m_player->setCoord(5, 0);
-
+        m_entities[0] = m_player;
         auto* enemy = new Enemy(*this);
+        enemy->setCoord(7, 2);
+        m_entities[1] = enemy;
+
+        enemy = new Enemy(*this);
+        enemy->setCoord(7, 1);
+        m_entities[2] = enemy;
+
+        enemy = new Enemy(*this);
         enemy->setCoord(7, 0);
-        m_entities[0] = enemy;
+        m_entities[3] = enemy;
     }
 
     void World::handleInput(sf::Event event) {
@@ -17,7 +25,7 @@ namespace bb {
         if(event.type == sf::Event::KeyPressed) {
             switch(event.key.code) {
                 case sf::Keyboard::F3:
-                    m_debugShown = !m_debugShown;
+                    m_debug.toggle();
                     break;
             }
         }
@@ -29,10 +37,10 @@ namespace bb {
 
     bool World::update() {
         m_debug.reset();
-        m_player->update();
         for(auto entity : m_entities) {
             entity.second->update();
         }
+        m_physics.update(m_entities);
         return true;
     }
 
@@ -41,8 +49,7 @@ namespace bb {
         for(auto entity : m_entities) {
             entity.second->draw(window, dt);
         }
-        if(m_debugShown)
-            m_debug.draw(window);
+        m_debug.draw(window);
     }
 
     Debug& World::getDebug() {

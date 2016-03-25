@@ -11,7 +11,9 @@ namespace bb {
         void reset();
         void addLine(std::string text);
         void draw(sf::RenderWindow& window);
+        void toggle();
     private:
+        bool m_shown;
         sf::Text m_text;
     };
 }

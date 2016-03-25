@@ -2,7 +2,7 @@
 #include "World.h"
 
 namespace bb {
-    Player::Player(World& world) : IEntity(world) {
+    Player::Player(World& world) : Entity(world) {
         m_velocity = {0.0F, 0.0F};
         m_sprite.setFillColor(sf::Color::White);
         m_sprite.setSize({64.0F, 64.0F});
@@ -12,6 +12,10 @@ namespace bb {
         m_isSprinting = false;
         m_sprint = 5;
         m_sprintCount = 0;
+        m_size = {64.0F, 64.0F};
+        m_hitbox = {0.0F, 0.0F, 64.0F, 64.0F};
+        m_isOnGround = true;
+        m_isMovable = true;
     }
 
     void Player::handleInput() {
@@ -44,10 +48,11 @@ namespace bb {
         if(event.type == sf::Event::KeyPressed) {
             switch(event.key.code) {
                 case sf::Keyboard::W:
-                    if(m_coord.y == 0 && !m_isDodging) {
+                    if(m_isOnGround && !m_isDodging) {
                         m_velocity.y = 0.6F;
                         m_doubleJump = true;
-                    } else if(m_coord.y > 0 && m_doubleJump) {
+                        m_isOnGround = false;
+                    } else if(!m_isOnGround && m_doubleJump) {
                         m_velocity.y = 0.6F;
                         m_doubleJump = false;
                     }
@@ -88,10 +93,12 @@ namespace bb {
                 m_velocity.y = 0;
             else
                 m_velocity.y -= 0.05F;
+            if(m_velocity.y < -3.0F) m_velocity.y = -3.0F;
         } else if(m_coord.y <= 0) {
             m_velocity.y = 0;
             m_coord.y = 0;
             m_doubleJump = true;
+            m_isOnGround = true;
         }
         debug.addLine("Double jump: " + std::string(m_doubleJump ? "True" : "False"));
         debug.addLine((m_isSprinting ? "Spriting:     " : "Not sprinting: ") + std::to_string(m_sprint));
@@ -121,5 +128,9 @@ namespace bb {
 
     void Player::setVelocity(float x, float y) {
         m_velocity = {x, y};
+    }
+
+    sf::FloatRect Player::getHitbox() {
+        return m_hitbox;
     }
 }

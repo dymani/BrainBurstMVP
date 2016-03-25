@@ -5,6 +5,7 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Debug.h"
+#include "Physics.h"
 
 namespace bb {
     class World {
@@ -18,9 +19,9 @@ namespace bb {
     private:
         sf::Font m_font;
         Player* m_player;
-        std::map<int, IEntity*> m_entities;
+        std::map<int, Entity*> m_entities;
         Debug m_debug;
-        bool m_debugShown = false;
+        Physics m_physics;
     };
 }
 

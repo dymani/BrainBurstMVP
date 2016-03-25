@@ -1,12 +1,12 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "IEntity.h"
+#include "Entity.h"
 
 namespace bb {
     class World;
 
-    class Player : public IEntity {
+    class Player : public Entity {
     public:
         Player(World& world);
         void handleInput();
@@ -17,8 +17,8 @@ namespace bb {
         void setCoord(float x, float y);
         sf::Vector2f getVelocity();
         void setVelocity(float x, float y);
+        sf::FloatRect getHitbox();
     private:
-        sf::Vector2f m_velocity;
         sf::RectangleShape m_sprite;
         bool m_isDodging, m_doubleJump, m_isSprinting;
         int m_sprint, m_sprintCount;

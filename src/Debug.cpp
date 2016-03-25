@@ -2,6 +2,7 @@
 
 namespace bb {
     Debug::Debug() {
+        m_shown = false;
     }
 
     void Debug::init(sf::Font& font) {
@@ -21,6 +22,10 @@ namespace bb {
     }
 
     void Debug::draw(sf::RenderWindow& window) {
-        window.draw(m_text);
+        if(m_shown) window.draw(m_text);
+    }
+
+    void Debug::toggle() {
+        m_shown = !m_shown;
     }
 }
