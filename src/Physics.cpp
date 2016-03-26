@@ -57,24 +57,100 @@ namespace bb {
                 float lCol = rightB - hitboxA.left;
                 float rCol = rightA - hitboxB.left;
 
-                if(tCol < bCol && tCol < lCol && tCol < rCol) { //Top collision
-                    newCoord.y = eB->m_coord.y + (eB->m_hitbox.top - eA->m_hitbox.height
-                        - eA->m_hitbox.top) / 64.0F;
-                    eA->m_velocity.y = 0.0F;
-                } else if(bCol < tCol && bCol < lCol && bCol < rCol) { //bottom collision
-                    newCoord.y = eB->m_coord.y + (eB->m_hitbox.top + eB->m_hitbox.height
-                        - eA->m_hitbox.top) / 64.0F;
-                    eA->m_velocity.y = 0.0F;
-                    eA->m_isOnGround = true;
-                } else if(lCol < rCol && lCol < tCol && lCol < bCol) { //Left collision
-                    newCoord.x = eB->m_coord.x + (eB->m_hitbox.left + eB->m_hitbox.width
-                        - eA->m_hitbox.left) / 64.0F;
-                    eA->m_velocity.x = 0.0F;
-                } else if(rCol < lCol && rCol < tCol && rCol < bCol) { //Right collision
-                    newCoord.x = eB->m_coord.x + (eB->m_hitbox.left - eA->m_hitbox.width
-                        - eA->m_hitbox.left) / 64.0F;
-                    eA->m_velocity.x = 0.0F;
+                if(eA->m_velocity.x > 0) { // right movement
+                    if(eA->m_velocity.y > 0) { // right & up movement
+                        if(tCol < bCol && tCol < lCol && tCol < rCol) { //top collision
+                            newCoord.y = eB->m_coord.y + (eB->m_hitbox.top - eA->m_hitbox.height
+                                - eA->m_hitbox.top) / 64.0F;
+                            eA->m_velocity.y = 0.0F;
+                        } else if(rCol < lCol && rCol < tCol && rCol < bCol) { //right collision
+                            newCoord.x = eB->m_coord.x + (eB->m_hitbox.left - eA->m_hitbox.width
+                                - eA->m_hitbox.left) / 64.0F;
+                            eA->m_velocity.x = 0.0F;
+                        }
+                    } else if(eA->m_velocity.y < 0) { // right & down movement
+                        if(bCol < tCol && bCol < lCol && bCol < rCol) { //bottom collision
+                            newCoord.y = eB->m_coord.y + (eB->m_hitbox.top + eB->m_hitbox.height
+                                - eA->m_hitbox.top) / 64.0F;
+                            eA->m_isOnGround = true;
+                            eA->m_velocity.y = 0.0F;
+                        } else if(rCol < lCol && rCol < tCol && rCol < bCol) { // right collision
+                            newCoord.x = eB->m_coord.x + (eB->m_hitbox.left - eA->m_hitbox.width
+                                - eA->m_hitbox.left) / 64.0F;
+                            eA->m_velocity.x = 0.0F;
+                        }
+                    } else { // right collision
+                        newCoord.x = eB->m_coord.x + (eB->m_hitbox.left - eA->m_hitbox.width
+                            - eA->m_hitbox.left) / 64.0F;
+                        eA->m_velocity.x = 0.0F;
+                    }
+                } else if(eA->m_velocity.x < 0) { //left movement
+                    if(eA->m_velocity.y > 0) { // left & up movement
+                        if(tCol < bCol && tCol < lCol && tCol < rCol) { // top collision
+                            newCoord.y = eB->m_coord.y + (eB->m_hitbox.top - eA->m_hitbox.height
+                                - eA->m_hitbox.top) / 64.0F;
+                            eA->m_velocity.y = 0.0F;
+                        } else if(lCol < rCol && lCol < tCol && lCol < bCol) { // left collision
+                            newCoord.x = eB->m_coord.x + (eB->m_hitbox.left + eB->m_hitbox.width
+                                - eA->m_hitbox.left) / 64.0F;
+                            eA->m_velocity.x = 0.0F;
+                        }
+                    } else if(eA->m_velocity.y < 0) { // left & down movement
+                        if(bCol < tCol && bCol < lCol && bCol < rCol) { // bottom collision
+                            newCoord.y = eB->m_coord.y + (eB->m_hitbox.top + eB->m_hitbox.height
+                                - eA->m_hitbox.top) / 64.0F;
+                            eA->m_isOnGround = true;
+                            eA->m_velocity.y = 0.0F;
+                        } else if(lCol < rCol && lCol < tCol && lCol < bCol) { // left collision
+                            newCoord.x = eB->m_coord.x + (eB->m_hitbox.left + eB->m_hitbox.width
+                                - eA->m_hitbox.left) / 64.0F;
+                            eA->m_velocity.x = 0.0F;
+                        }
+                    } else { // left collision
+                        newCoord.x = eB->m_coord.x + (eB->m_hitbox.left + eB->m_hitbox.width
+                            - eA->m_hitbox.left) / 64.0F;
+                        eA->m_velocity.x = 0.0F;
+                    }
+                } else { // up or down movement
+                    if(eA->m_velocity.y > 0) { // top collision
+                        newCoord.y = eB->m_coord.y + (eB->m_hitbox.top - eA->m_hitbox.height
+                            - eA->m_hitbox.top) / 64.0F;
+                        eA->m_velocity.y = 0.0F;
+                    } else if(eA->m_velocity.y < 0) { // bottom collision
+                        newCoord.y = eB->m_coord.y + (eB->m_hitbox.top + eB->m_hitbox.height
+                            - eA->m_hitbox.top) / 64.0F;
+                        eA->m_isOnGround = true;
+                        eA->m_velocity.y = 0.0F;
+                    }
                 }
+
+
+                //m_world.getDebug().addLine(std::to_string(std::abs(eA->m_velocity.x)) + " "
+                //    + std::to_string(std::abs(eA->m_velocity.y)));
+                //if(std::abs(eA->m_velocity.x) > std::abs(eA->m_velocity.y)) {
+                //    if(eA->m_velocity.x < 0) { // Leftward movement
+
+                //    } else if(eA->m_velocity.x > 0) { // Rightward movement
+                //
+                //    }
+                //} else if(std::abs(eA->m_velocity.x) < std::abs(eA->m_velocity.y)) {
+                //    if(eA->m_velocity.y < 0) { // Downward movement
+                //
+                //    } else if(eA->m_velocity.y > 0) { // Upward movement
+                //
+                //    }
+                //
+                //}
+
+                //if(tCol < bCol && tCol < lCol && tCol < rCol) { //Top collision
+
+                //} else if(bCol < tCol && bCol < lCol && bCol < rCol) { //bottom collision
+
+                //} else if(lCol < rCol && lCol < tCol && lCol < bCol) { //Left collision
+
+                //} else if(rCol < lCol && rCol < tCol && rCol < bCol) { //Right collision
+
+                //}
             }
             eA->m_coord = newCoord;
         }
@@ -91,7 +167,7 @@ namespace bb {
     }
 
     sf::FloatRect Physics::getHitbox(Entity * e) {
-        return  {64 * e->m_coord.x + e->m_hitbox.left, 540 - 64 * e->m_coord.y
+        return{64 * e->m_coord.x + e->m_hitbox.left, 540 - 64 * e->m_coord.y
             - e->m_hitbox.top - e->m_hitbox.height, e->m_hitbox.width, e->m_hitbox.height};
     }
 }
