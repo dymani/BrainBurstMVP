@@ -10,7 +10,7 @@
 namespace bb {
     class Game {
     public:
-        static const int MS_PER_UPDATE = 20;
+        static int const MS_PER_UPDATE = 20;
         Game();
         ~Game();
         int run();

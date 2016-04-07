@@ -8,14 +8,10 @@ namespace bb {
 
     class Enemy : public Entity{
     public:
-        Enemy(World& world);
+        Enemy(World& world, float coordX, float coordY);
         void update();
         void draw(sf::RenderWindow& window, const double dt);
-        sf::Vector2f getCoord();
-        void setCoord(float x, float y);
-        sf::Vector2f getVelocity();
-        void setVelocity(float x, float y);
-        sf::FloatRect getHitbox();
+        b2Body* getBody();
     private:
         sf::RectangleShape m_sprite;
     };

@@ -3,19 +3,38 @@
 
 namespace bb {
     Player::Player(World& world) : Entity(world) {
-        m_velocity = {0.0F, 0.0F};
         m_sprite.setFillColor(sf::Color::White);
-        m_sprite.setSize({64.0F, 64.0F});
-        m_sprite.setOrigin({0.0F, 64.0F});
-        m_isDodging = false;
-        m_doubleJump = true;
+        m_sprite.setSize({64.0f, 64.0f});
+        m_sprite.setOrigin({32.0f, 32.0f});
+
+        b2BodyDef bodyDef;
+        bodyDef.type = b2_dynamicBody;
+        bodyDef.position.Set(5.0f, 5.0f);
+        bodyDef.fixedRotation = true;
+        m_body = m_world.getBWorld().CreateBody(&bodyDef);
+
+        b2PolygonShape dynamicBox;
+        dynamicBox.SetAsBox(0.5f, 0.5f);
+
+        b2FixtureDef fixtureDef;
+        fixtureDef.shape = &dynamicBox;
+        fixtureDef.density = 50.0f;
+        fixtureDef.friction = 0.3f;
+        m_body->CreateFixture(&fixtureDef);
+
+        dynamicBox.SetAsBox(0.5f, 0.05f, b2Vec2(0, -0.5f), 0);
+        fixtureDef.isSensor = true;
+        b2Fixture* footSensorFixture = m_body->CreateFixture(&fixtureDef);
+        footSensorFixture->SetUserData((void*)3);
+
+        m_contactListener = new PlayerContactListener(*this);
+        m_world.getBWorld().SetContactListener(m_contactListener);
+
+        m_jumpState = JS_STOP;
+        m_jumpTimeout = 0;
         m_isSprinting = false;
-        m_sprint = 5;
-        m_sprintCount = 0;
-        m_size = {64.0F, 64.0F};
-        m_hitbox = {0.0F, 0.0F, 64.0F, 64.0F};
-        m_isOnGround = true;
-        m_isMovable = true;
+        m_isDodging = false;
+
     }
 
     void Player::handleInput() {
@@ -25,38 +44,24 @@ namespace bb {
         bool keySprint = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift);
         m_isDodging = keyDodge;
         m_isSprinting = keySprint;
-        float speed;
-        if(m_isDodging) {
-            m_hitbox = {0.0F, 0.0F, 64.F, 44.8F};
-            speed = 0.05F;
-            m_isSprinting = false;
-        } else {
-            m_hitbox = {0.0F, 0.0F, 64.0F, 64.0F};
-            if(m_sprint <= 0)
-                m_isSprinting = false;
-            if(m_isSprinting)
-                speed = 0.8F;
-            else
-                speed = 0.1F;
-        }
+        m_moveState = MS_STOP;
         if(keyLeft && !keyRight)
-            m_velocity.x = -speed;
+            m_moveState = MS_LEFT;
         else if(keyRight && !keyLeft)
-            m_velocity.x = speed;
-        if(m_velocity.x == 0) m_isSprinting = false;
+            m_moveState = MS_RIGHT;
+        else
+            m_isSprinting = false;
     }
 
     void Player::handleInput(sf::Event event) {
         if(event.type == sf::Event::KeyPressed) {
             switch(event.key.code) {
                 case sf::Keyboard::W:
-                    if(m_isOnGround && !m_isDodging) {
-                        m_velocity.y = 0.6F;
-                        m_doubleJump = true;
-                        m_isOnGround = false;
-                    } else if(!m_isOnGround && m_doubleJump) {
-                        m_velocity.y = 0.6F;
-                        m_doubleJump = false;
+                    if(m_body->GetLinearVelocity().y == 0) {
+                        m_jumpState = JS_JUMP;
+                    } else {
+                        if(m_jumpState == JS_STOP)
+                            m_jumpState = JS_DOUBLE_JUMP;
                     }
                     break;
             }
@@ -64,78 +69,94 @@ namespace bb {
     }
 
     void Player::update() {
+        m_jumpTimeout--;
         auto& debug = m_world.getDebug();
-
-        m_coord.x += m_velocity.x;
-        m_coord.y += m_velocity.y;
-        debug.addLine("Coord:    " + std::to_string(m_coord.x) + " " + std::to_string(m_coord.y));
-        debug.addLine("Velocity: " + std::to_string(m_velocity.x) + " " + std::to_string(m_velocity.y));
-        if(m_isSprinting) {
-            if(m_velocity.x != 0) {
-                m_sprint--;
+        auto coord = m_body->GetPosition();
+        auto vel = m_body->GetLinearVelocity();
+        float desiredVelX = 0;
+        float desiredVelY = vel.y;
+        float desiredSpeed = 5.0f;
+        if(vel.x == 0 && vel.y == 0) {
+            m_sprintDuration++;
+            m_sprintDuration = m_sprintDuration > 10 ? 10 : m_sprintDuration;
+        }
+        if(m_isDodging) {
+            desiredSpeed = 2.5f;
+        } else {
+            if(m_isSprinting) {
+                m_sprintDuration--;
+                m_sprintDuration = m_sprintDuration < -10 ? -10 : m_sprintDuration;
+                if(m_sprintDuration > 0) {
+                    desiredSpeed = 30.0f;
+                    if(vel.y != 0)
+                        m_body->ApplyForce(m_body->GetMass() * -m_world.getBWorld().GetGravity(),
+                            m_body->GetWorldCenter(), true);
+                }
             }
-        } else if(m_velocity.x == 0) {
-            m_sprintCount++;
-            if(m_sprintCount >= 5) {
-                m_sprintCount = 0;
-                m_sprint = m_sprint < 5 ? m_sprint + 1 : 5;
+        }
+        switch(m_moveState) {
+            case MS_LEFT:  desiredVelX = -desiredSpeed; break;
+            case MS_STOP:  desiredVelX = 0; break;
+            case MS_RIGHT: desiredVelX = desiredSpeed; break;
+        }
+        if(m_jumpState == JS_JUMP) {
+            m_jumpState = JS_STOP;
+            if(m_numFootContacts >= 1) {
+                if(m_jumpTimeout <= 0) {
+                    if(!m_isDodging) {
+                        desiredVelY = 10.0f;
+                        m_jumpTimeout = 15;
+                    }
+                }
             }
+        } else if(m_jumpState == JS_DOUBLE_JUMP) {
+            m_jumpState = JS_DOUBLE_STOP;
+            if(!m_isDodging) {
+                desiredVelY = 10.0f;
+            }
+        } else if(m_jumpState == JS_DOUBLE_STOP) {
+            if(vel.y == 0) m_jumpState = JS_STOP;
         }
-        if(m_velocity.x > 0) {
-            m_velocity.x -= 0.1F;
-            if(m_velocity.x < 0)
-                m_velocity.x = 0;
-        } else if(m_velocity.x < 0) {
-            m_velocity.x += 0.1F;
-            if(m_velocity.x > 0)
-                m_velocity.x = 0;
-        }
-        if(m_coord.y > 0) {
-            if(m_isSprinting)
-                m_velocity.y = 0;
-            else
-                m_velocity.y -= 0.05F;
-            if(m_velocity.y < -3.0F) m_velocity.y = -3.0F;
-        } else if(m_coord.y <= 0) {
-            m_velocity.y = 0;
-            m_coord.y = 0;
-            m_doubleJump = true;
-            m_isOnGround = true;
-        }
-        debug.addLine("Double jump: " + std::string(m_doubleJump ? "True" : "False"));
-        if(m_isSprinting)
-            debug.addLine("Spriting              Time: " + std::to_string(m_sprint));
-        else
-            debug.addLine("Not sprinting   Time: " + std::to_string(m_sprint));
-        debug.addLine(m_isDodging ? "Dodging" : "Not dodging");
+        float velXChange = desiredVelX - vel.x;
+        float velYChange = desiredVelY - vel.y;
+        float impulseX = m_body->GetMass() * velXChange;
+        float impulseY = m_body->GetMass() * velYChange;
+        m_body->ApplyLinearImpulse(b2Vec2(impulseX, impulseY), m_body->GetWorldCenter(), true);
+        debug.addLine("Coord:    " + std::to_string(coord.x) + " " + std::to_string(coord.y));
+        debug.addLine("Velocity: " + std::to_string(vel.x) + " " + std::to_string(vel.y));
+        debug.addLine("Dodge:    " + std::string(m_isDodging ? "True" : "False"));
+        debug.addLine("Jump:     " + std::string(m_jumpState == JS_STOP ? "Jumped" : "Double jumped"));
+        debug.addLine("Sprint:    " + std::to_string(m_sprintDuration));
     }
 
     void Player::draw(sf::RenderWindow & window, const double dt) {
-        m_sprite.setPosition({64 * m_coord.x, 540 - 64 * m_coord.y});
-        if(m_isDodging)
-            m_sprite.setScale({1.0F, 0.7F});
-        else
-            m_sprite.setScale({1.0F, 1.0F});
+        auto coord = m_body->GetPosition();
+        m_sprite.setPosition({64 * coord.x, 540 - 64 * coord.y});
         window.draw(m_sprite);
     }
 
-    sf::Vector2f Player::getCoord() {
-        return m_coord;
+    b2Body* Player::getBody() {
+        return m_body;
     }
 
-    void Player::setCoord(float x, float y) {
-        m_coord = {x, y};
+    PlayerContactListener::PlayerContactListener(Player& player) : m_player(player) {
     }
 
-    sf::Vector2f Player::getVelocity() {
-        return m_velocity;
+    void PlayerContactListener::BeginContact(b2Contact* contact) {
+        void* fixtureUserData = contact->GetFixtureA()->GetUserData();
+        if((int)fixtureUserData == 3)
+            m_player.m_numFootContacts++;
+        fixtureUserData = contact->GetFixtureB()->GetUserData();
+        if((int)fixtureUserData == 3)
+            m_player.m_numFootContacts++;
     }
 
-    void Player::setVelocity(float x, float y) {
-        m_velocity = {x, y};
-    }
-
-    sf::FloatRect Player::getHitbox() {
-        return m_hitbox;
+    void PlayerContactListener::EndContact(b2Contact* contact) {
+        void* fixtureUserData = contact->GetFixtureA()->GetUserData();
+        if((int)fixtureUserData == 3)
+            m_player.m_numFootContacts--;
+        fixtureUserData = contact->GetFixtureB()->GetUserData();
+        if((int)fixtureUserData == 3)
+            m_player.m_numFootContacts--;
     }
 }

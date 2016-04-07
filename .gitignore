@@ -213,3 +213,5 @@ ModelManifest.xml
 /dependencies/SFML
 *.opendb
 /reference
+/dependencies/Box2D
+/include/Box2D

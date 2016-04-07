@@ -1,28 +1,29 @@
 #include "World.h"
 
 namespace bb {
-    World::World() : m_physics(*this) {
+    World::World() : m_bWorld(b2Vec2(0.0f, -20.0f)) {
         m_font.loadFromFile("assets/system.otf");
         m_debug.init(m_font);
+
+        b2BodyDef groundBodyDef;
+        groundBodyDef.position.Set(0.0f, -1.0f);
+        m_ground = m_bWorld.CreateBody(&groundBodyDef);
+
+        b2PolygonShape groundBox;
+        groundBox.SetAsBox(20.0f, 1.0F);
+        m_ground->CreateFixture(&groundBox, 0.0f);
+
         m_player = new Player(*this);
-        m_player->setCoord(5, 0);
-        m_entities[0] = m_player;
-        auto* enemy = new Enemy(*this);
-        enemy->setCoord(7, 4);
-        m_entities[1] = enemy;
+        m_entities.push_back(m_player);
 
-        /*enemy = new Enemy(*this);
-        enemy->setCoord(7, 1);
-        m_entities[2] = enemy;*/
+        Enemy* enemy = new Enemy(*this, 5.0f, 0.5f);
+        m_entities.push_back(enemy);
 
-        enemy = new Enemy(*this);
-        enemy->setCoord(7, 0.71F);
-        m_entities[3] = enemy;
     }
 
     void World::handleInput(sf::Event event) {
-        m_player->handleInput(event);
         if(event.type == sf::Event::KeyPressed) {
+            m_player->handleInput(event);
             switch(event.key.code) {
                 case sf::Keyboard::F3:
                     m_debug.toggle();
@@ -37,23 +38,26 @@ namespace bb {
 
     bool World::update() {
         m_debug.reset();
-        for(auto entity : m_entities) {
-            entity.second->update();
+        for(auto* entity : m_entities) {
+            entity->update();
         }
-        m_physics.update(m_entities);
+        m_bWorld.Step(timeStep, velocityIterations, positionIterations);
+        m_bWorld.ClearForces();
         return true;
     }
 
     void World::draw(sf::RenderWindow& window, const double dt) {
-        m_player->draw(window, dt);
-        for(auto entity : m_entities) {
-            entity.second->draw(window, dt);
+        for(auto* entity : m_entities) {
+            entity->draw(window, dt);
         }
-        if(m_debug.isDebug()) m_physics.drawHitboxes(window, m_entities);
         m_debug.draw(window);
     }
 
     Debug& World::getDebug() {
         return m_debug;
+    }
+
+    b2World& World::getBWorld() {
+        return m_bWorld;
     }
 }

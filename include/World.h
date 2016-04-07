@@ -2,10 +2,11 @@
 #define WORLD_H
 
 #include <SFML/Graphics.hpp>
+#include <Box2D/Box2D.h>
+#include "Debug.h"
+#include "Entity.h"
 #include "Player.h"
 #include "Enemy.h"
-#include "Debug.h"
-#include "Physics.h"
 
 namespace bb {
     class World {
@@ -16,12 +17,17 @@ namespace bb {
         bool update();
         void draw(sf::RenderWindow& window, const double dt);
         Debug& getDebug();
+        b2World& getBWorld();
     private:
         sf::Font m_font;
-        Player* m_player;
-        std::map<int, Entity*> m_entities;
+        std::vector<Entity*> m_entities;
         Debug m_debug;
-        Physics m_physics;
+        b2World m_bWorld;
+        Player* m_player;
+        b2Body* m_ground;
+        float32 timeStep = 1.0F / 50.0F;
+        int32 velocityIterations = 8;
+        int32 positionIterations = 3;
     };
 }
 
