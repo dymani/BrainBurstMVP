@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <iostream>
 #include "Entity.h"
 
 namespace bb {
@@ -13,9 +14,11 @@ namespace bb {
         Player(World& world);
         void handleInput();
         void handleInput(sf::Event event);
-        void update();
-        void draw(sf::RenderWindow& window, const double dt);
+        bool update();
+        void draw(const double dt);
         b2Body* getBody();
+        int getHp();
+        void setHp(int hp);
     private:
         sf::RectangleShape m_sprite;
         enum MoveState {

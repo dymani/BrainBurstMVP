@@ -17,6 +17,7 @@ namespace bb {
         void handleInput();
         bool update();
         void draw(const double dt);
+        sf::RenderWindow& getWindow();
     private:
         enum State {
             RUNNING, QUIT

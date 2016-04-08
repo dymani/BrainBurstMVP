@@ -1,7 +1,7 @@
 #include "Game.h"
 
 namespace bb {
-    Game::Game(){
+    Game::Game() : m_world(*this) {
 
     }
 
@@ -65,7 +65,11 @@ namespace bb {
 
     void Game::draw(const double dt){
         m_window.clear();
-        m_world.draw(m_window, dt);
+        m_world.draw(dt);
         m_window.display();
+    }
+
+    sf::RenderWindow& Game::getWindow() {
+        return m_window;
     }
 }

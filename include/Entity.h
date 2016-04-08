@@ -13,12 +13,15 @@ namespace bb {
         }
         virtual ~Entity() {
         }
+        virtual bool update() = 0;
+        virtual void draw(const double dt) = 0;
         virtual b2Body* getBody() = 0;
-        virtual void update() = 0;
-        virtual void draw(sf::RenderWindow& window, const double dt) = 0;
+        virtual int getHp() = 0;
+        virtual void setHp(int hp) = 0;
     protected:
         World& m_world;
         b2Body* m_body;
+        int m_hp;
     };
 }
 

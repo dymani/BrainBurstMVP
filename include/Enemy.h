@@ -8,11 +8,16 @@ namespace bb {
 
     class Enemy : public Entity{
     public:
-        Enemy(World& world, float coordX, float coordY);
-        void update();
-        void draw(sf::RenderWindow& window, const double dt);
+        Enemy(World& world, float coordX, float coordY, int type);
+        bool update();
+        void draw(const double dt);
         b2Body* getBody();
+        int getHp();
+        void setHp(int hp);
     private:
+        const enum Type {
+            T_STATIC, T_MOBILE
+        } m_type;
         sf::RectangleShape m_sprite;
     };
 }
