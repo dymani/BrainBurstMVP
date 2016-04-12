@@ -22,7 +22,7 @@ namespace bb {
         fixtureDef.friction = 0.3f;
         m_body->CreateFixture(&fixtureDef);
 
-        dynamicBox.SetAsBox(0.5f, 0.05f, b2Vec2(0, -0.5f), 0);
+        dynamicBox.SetAsBox(0.4f, 0.05f, b2Vec2(0, -0.5f), 0);
         fixtureDef.isSensor = true;
         b2Fixture* footSensorFixture = m_body->CreateFixture(&fixtureDef);
         footSensorFixture->SetUserData((void*)3);
@@ -87,12 +87,12 @@ namespace bb {
         float desiredVelX = 0;
         float desiredVelY = vel.y;
         float desiredSpeed = 5.0f;
-        if(vel.x == 0 && vel.y == 0) {
+        if(m_moveState == MS_STOP && m_numFootContacts >= 1) {
             m_sprintDuration++;
             m_sprintDuration = m_sprintDuration > 10 ? 10 : m_sprintDuration;
         }
         if(m_isDodging) {
-            desiredSpeed = 2.5f;
+            desiredSpeed = 1.0f;
         } else {
             if(m_isSprinting) {
                 m_sprintDuration--;
@@ -126,7 +126,7 @@ namespace bb {
                 desiredVelY = 10.0f;
             }
         } else if(m_jumpState == JS_DOUBLE_STOP) {
-            if(vel.y == 0) m_jumpState = JS_STOP;
+            if(m_numFootContacts >= 1) m_jumpState = JS_STOP;
         }
         float velXChange = desiredVelX - vel.x;
         float velYChange = desiredVelY - vel.y;

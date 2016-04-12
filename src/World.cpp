@@ -11,16 +11,32 @@ namespace bb {
         m_ground = m_bWorld.CreateBody(&groundBodyDef);
 
         b2PolygonShape groundBox;
-        groundBox.SetAsBox(20.0f, 1.0F);
+        groundBox.SetAsBox(20.0f, 1.0f);
         m_ground->CreateFixture(&groundBox, 0.0f);
+
+        b2BodyDef borderBodyDef;
+        borderBodyDef.position.Set(-1.0f, 0.0f);
+        m_borderL = m_bWorld.CreateBody(&borderBodyDef);
+        borderBodyDef.position.Set(21.0f, 0.0f);
+        m_borderR = m_bWorld.CreateBody(&borderBodyDef);
+
+        b2PolygonShape borderBox;
+        borderBox.SetAsBox(1.0f, 10.0f);
+
+        b2FixtureDef fixtureDef;
+        fixtureDef.shape = &borderBox;
+        fixtureDef.density = 0.0f;
+        fixtureDef.friction = 0.0f;
+        m_borderL->CreateFixture(&fixtureDef);
+        m_borderR->CreateFixture(&fixtureDef);
 
         m_player = new Player(*this);
         m_entities[0] = m_player;
 
         Enemy* enemy = new Enemy(*this, 5.0f, 2.5f, 0);
         m_entities[1] = enemy;
-        enemy = new Enemy(*this, 5.0f, 3.5f, 0);
-        m_entities[2] = enemy;
+        /*enemy = new Enemy(*this, 5.0f, 3.5f, 0);
+        m_entities[2] = enemy;*/
         enemy = new Enemy(*this, 8.0f, 2.5f, 1);
         m_entities[3] = enemy;
 

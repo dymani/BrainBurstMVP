@@ -34,6 +34,8 @@ namespace bb {
         b2World m_bWorld;
         Player* m_player;
         b2Body* m_ground;
+        b2Body* m_borderL;
+        b2Body* m_borderR;
         std::map<int, Entity*> m_entities;
         std::vector<std::pair<int, int>> m_damages;
     };
