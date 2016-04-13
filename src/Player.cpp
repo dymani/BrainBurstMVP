@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "World.h"
+#include "BasicAbility.h"
 
 namespace bb {
     Player::Player(World& world) : Entity(world) {
@@ -36,6 +37,9 @@ namespace bb {
         m_isDodging = false;
 
         m_hp = -1;
+        m_abilityState = AS_NONE;
+        m_ability = -1;
+        m_abilities.push_back(new BasicAbility(m_world, sf::Keyboard::Num1));
     }
 
     void Player::handleInput() {
@@ -52,6 +56,20 @@ namespace bb {
             m_moveState = MS_RIGHT;
         else
             m_isSprinting = false;
+
+        if(m_abilityState == AS_HOLD) {
+            if(!sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                m_abilityState = AS_NONE;
+                m_ability = -1;
+                m_abilityHold = 0;
+            }
+        } else if(m_abilityState == AS_COUNT) {
+            if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                m_abilityState = AS_HOLD;
+                m_abilityCount = 0;
+                m_abilityHold = m_abilities[m_ability]->getHold();
+            }
+        }
     }
 
     void Player::handleInput(sf::Event event) {
@@ -66,15 +84,35 @@ namespace bb {
                     }
                     break;
             }
+            if(m_abilityState == AS_NONE) {
+                for(auto a : m_abilities) {
+                    if(event.key.code == a->getKey()) {
+                        m_ability = std::find(m_abilities.begin(), m_abilities.end(), a) - m_abilities.begin();
+                        m_abilityState = AS_COUNT;
+                        m_abilityCount = -50;
+                        break;
+                    }
+                }
+            }
         } else if(event.type == sf::Event::MouseButtonPressed) {
             if(event.mouseButton.button == sf::Mouse::Left) {
                 auto coord = m_world.mapPixelToCoord(sf::Mouse::getPosition(m_world.getWindow()));
-                int entity = m_world.seekEntity(coord);
-                double distance = std::sqrt(double(
-                    (coord.x - m_body->GetPosition().x) * (coord.x - m_body->GetPosition().x) +
-                    (coord.y - m_body->GetPosition().y) * (coord.y - m_body->GetPosition().y)));
-                if(distance < 5)
-                    m_world.damage(entity, 1);
+                if(m_abilityState == AS_NONE) {
+                    int entity = m_world.seekEntity(coord);
+                    double distance = std::sqrt(double(
+                        (coord.x - m_body->GetPosition().x) * (coord.x - m_body->GetPosition().x) +
+                        (coord.y - m_body->GetPosition().y) * (coord.y - m_body->GetPosition().y)));
+                    if(distance < 5)
+                        m_world.damage(entity, 1);
+                } else if(m_abilityState == AS_USE) {
+                    m_abilities[m_ability]->use(this, coord);
+                    std::cout << m_ability << std::endl;
+                    m_abilityState = AS_NONE;
+                    m_ability = -1;
+                    m_abilityCount = 0;
+                    m_abilityHold = 0;
+                    m_abilityTimeout = 0;
+                }
             }
         }
     }
@@ -133,6 +171,34 @@ namespace bb {
         float impulseX = m_body->GetMass() * velXChange;
         float impulseY = m_body->GetMass() * velYChange;
         m_body->ApplyLinearImpulse(b2Vec2(impulseX, impulseY), m_body->GetWorldCenter(), true);
+
+        switch(m_abilityState) {
+            case AS_COUNT:
+                m_abilityCount++;
+                if(m_abilityCount >= 0) {
+                    m_abilityState = AS_NONE;
+                    m_ability = -1;
+                    m_abilityCount = 0;
+                }
+                break;
+            case AS_HOLD:
+                m_abilityHold++;
+                if(m_abilityHold >= 0) {
+                    m_abilityState = AS_USE;
+                    m_abilityTimeout = m_abilities[m_ability]->getTimeout();
+                    m_abilityHold = 0;
+                }
+                break;
+            case AS_USE:
+                m_abilityTimeout++;
+                if(m_abilityTimeout >= 0) {
+                    m_abilityState = AS_NONE;
+                    m_ability = -1;
+                    m_abilityTimeout = 0;
+                }
+                break;
+        }
+
         debug.addLine("Coord:    " + std::to_string(coord.x) + " " + std::to_string(coord.y));
         debug.addLine("Velocity: " + std::to_string(vel.x) + " " + std::to_string(vel.y));
         debug.addLine("Dodge:    " + std::string(m_isDodging ? "True" : "False"));
@@ -152,6 +218,9 @@ namespace bb {
 
         }
         debug.addLine("Sprint:    " + std::to_string(m_sprintDuration));
+        debug.addLine("Ability:   " + std::to_string(int(m_abilityState)) + " (" + std::to_string(m_ability)
+            + " " + std::to_string(m_abilityCount) + " " + std::to_string(m_abilityHold)
+            + " " + std::to_string(m_abilityTimeout) + ")");
         return true;
     }
 

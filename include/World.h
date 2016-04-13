@@ -24,6 +24,7 @@ namespace bb {
         void damage(int id, int damage);
         sf::Vector2f mapPixelToCoord(sf::Vector2i pixel);
         int seekEntity(sf::Vector2f coord);
+        Entity* getEntity(int id);
     private:
         Game& m_game;
         float32 timeStep = 1.0F / 50.0F;

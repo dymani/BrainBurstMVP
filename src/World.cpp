@@ -113,4 +113,8 @@ namespace bb {
         }
         return -1;
     }
+
+    Entity* World::getEntity(int id) {
+        return m_entities[id];
+    }
 }

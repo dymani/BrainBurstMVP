@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\BasicAbility.cpp" />
     <ClCompile Include="src\Debug.cpp" />
     <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\Game.cpp" />
@@ -138,6 +139,8 @@
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Ability.h" />
+    <ClInclude Include="include\BasicAbility.h" />
     <ClInclude Include="include\Debug.h" />
     <ClInclude Include="include\Enemy.h" />
     <ClInclude Include="include\Entity.h" />

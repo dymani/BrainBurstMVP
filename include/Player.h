@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "Entity.h"
+#include "Ability.h"
 
 namespace bb {
     class World;
@@ -31,6 +32,11 @@ namespace bb {
         bool m_isSprinting, m_isDodging;
         int m_sprintDuration;
         PlayerContactListener* m_contactListener;
+        enum AbilityState {
+            AS_NONE, AS_COUNT, AS_HOLD, AS_USE
+        } m_abilityState;
+        int m_ability, m_abilityCount, m_abilityHold, m_abilityTimeout;
+        std::vector<Ability*> m_abilities;
     };
 
     class PlayerContactListener : public b2ContactListener {
