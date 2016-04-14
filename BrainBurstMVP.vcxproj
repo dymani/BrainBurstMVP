@@ -134,8 +134,9 @@
     <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\Projectile.cpp" />
+    <ClCompile Include="src\ProjectileAbility.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -145,8 +146,9 @@
     <ClInclude Include="include\Enemy.h" />
     <ClInclude Include="include\Entity.h" />
     <ClInclude Include="include\Game.h" />
-    <ClInclude Include="include\Physics.h" />
     <ClInclude Include="include\Player.h" />
+    <ClInclude Include="include\Projectile.h" />
+    <ClInclude Include="include\ProjectileAbility.h" />
     <ClInclude Include="include\World.h" />
   </ItemGroup>
   <ItemGroup>

@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <Box2D/Box2D.h>
+#include <memory>
 #include "Debug.h"
 #include "Entity.h"
 #include "Player.h"
@@ -25,6 +26,7 @@ namespace bb {
         sf::Vector2f mapPixelToCoord(sf::Vector2i pixel);
         int seekEntity(sf::Vector2f coord);
         Entity* getEntity(int id);
+        int addEntity(Entity* entity);
     private:
         Game& m_game;
         float32 timeStep = 1.0F / 50.0F;
@@ -37,7 +39,8 @@ namespace bb {
         b2Body* m_ground;
         b2Body* m_borderL;
         b2Body* m_borderR;
-        std::map<int, Entity*> m_entities;
+        b2Body* m_borderU;
+        std::map<int, std::unique_ptr<Entity>> m_entities;
         std::vector<std::pair<int, int>> m_damages;
     };
 

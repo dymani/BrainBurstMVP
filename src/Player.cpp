@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "World.h"
 #include "BasicAbility.h"
+#include "ProjectileAbility.h"
 
 namespace bb {
     Player::Player(World& world) : Entity(world) {
@@ -21,7 +22,8 @@ namespace bb {
         fixtureDef.shape = &dynamicBox;
         fixtureDef.density = 50.0f;
         fixtureDef.friction = 0.3f;
-        m_body->CreateFixture(&fixtureDef);
+        auto* playerFix =  m_body->CreateFixture(&fixtureDef);
+        playerFix->SetUserData((void*)0);
 
         dynamicBox.SetAsBox(0.4f, 0.05f, b2Vec2(0, -0.5f), 0);
         fixtureDef.isSensor = true;
@@ -40,6 +42,7 @@ namespace bb {
         m_abilityState = AS_NONE;
         m_ability = -1;
         m_abilities.push_back(new BasicAbility(m_world, sf::Keyboard::Num1));
+        m_abilities.push_back(new ProjectileAbility(m_world, sf::Keyboard::Num2));
     }
 
     void Player::handleInput() {
@@ -104,9 +107,13 @@ namespace bb {
                         (coord.y - m_body->GetPosition().y) * (coord.y - m_body->GetPosition().y)));
                     if(distance < 5)
                         m_world.damage(entity, 1);
-                } else if(m_abilityState == AS_USE) {
+                }
+            }
+        } else if(event.type == sf::Event::MouseButtonReleased) {
+            if(event.mouseButton.button == sf::Mouse::Left) {
+                auto coord = m_world.mapPixelToCoord(sf::Mouse::getPosition(m_world.getWindow()));
+                if(m_abilityState == AS_USE) {
                     m_abilities[m_ability]->use(this, coord);
-                    std::cout << m_ability << std::endl;
                     m_abilityState = AS_NONE;
                     m_ability = -1;
                     m_abilityCount = 0;

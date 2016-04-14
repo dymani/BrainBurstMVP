@@ -3,6 +3,8 @@
 
 namespace bb {
     World::World(Game& game) : m_game(game), m_bWorld(b2Vec2(0.0f, -20.0f)) {
+        srand(unsigned int(time(NULL)));
+
         m_font.loadFromFile("assets/system.otf");
         m_debug.init(m_font);
 
@@ -19,6 +21,8 @@ namespace bb {
         m_borderL = m_bWorld.CreateBody(&borderBodyDef);
         borderBodyDef.position.Set(21.0f, 0.0f);
         m_borderR = m_bWorld.CreateBody(&borderBodyDef);
+        borderBodyDef.position.Set(0.0f, 11.0f);
+        m_borderU= m_bWorld.CreateBody(&borderBodyDef);
 
         b2PolygonShape borderBox;
         borderBox.SetAsBox(1.0f, 10.0f);
@@ -29,17 +33,17 @@ namespace bb {
         fixtureDef.friction = 0.0f;
         m_borderL->CreateFixture(&fixtureDef);
         m_borderR->CreateFixture(&fixtureDef);
+        fixtureDef.shape = &groundBox;
+        m_borderU->CreateFixture(&fixtureDef);
 
         m_player = new Player(*this);
-        m_entities[0] = m_player;
+        m_entities[0] = std::unique_ptr<Entity>(m_player);
 
-        Enemy* enemy = new Enemy(*this, 5.0f, 2.5f, 0);
-        m_entities[1] = enemy;
-        /*enemy = new Enemy(*this, 5.0f, 3.5f, 0);
-        m_entities[2] = enemy;*/
+        Entity* enemy;
+        enemy = new Enemy(*this, 5.0f, 2.5f, 0);
+        addEntity(enemy);
         enemy = new Enemy(*this, 8.0f, 2.5f, 1);
-        m_entities[3] = enemy;
-
+        addEntity(enemy);
     }
 
     void World::handleInput(sf::Event event) {
@@ -115,6 +119,15 @@ namespace bb {
     }
 
     Entity* World::getEntity(int id) {
-        return m_entities[id];
+        return m_entities[id].get();
+    }
+
+    int World::addEntity(Entity* entity) {
+        int id = rand() % 100;
+        while(m_entities.find(id) != m_entities.end()) {
+            id = rand() % 100;
+        }
+        m_entities[id] = std::unique_ptr<Entity>(entity);
+        return id;
     }
 }
