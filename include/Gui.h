@@ -15,7 +15,10 @@ namespace bb {
         void draw(const double dt);
     private:
         World& m_world;
+        sf::RectangleShape m_cursor;
         sf::CircleShape m_playerJump, m_playerSprint;
+        std::vector<sf::RectangleShape> m_playerAbilities;
+        bool m_abilityCreated = false;
     };
 }
 

@@ -10,7 +10,7 @@ namespace bb {
                 m_sprite.setFillColor(sf::Color::Blue);
                 break;
             case T_MOBILE:
-                m_sprite.setFillColor(sf::Color::Green);
+                m_sprite.setFillColor(sf::Color::Yellow);
                 break;
         }
 

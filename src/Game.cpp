@@ -10,7 +10,7 @@ namespace bb {
     }
 
     int Game::run(){
-        m_window.create(sf::VideoMode(960, 540), "Brain Burst [MVP]");
+        m_window.create(sf::VideoMode(960, 540), "Brain Burst [MVP]", sf::Style::Close);
         clock_t previous, lag, current, elapsed;
         previous = clock();
         lag = 0;

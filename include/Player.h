@@ -25,6 +25,12 @@ namespace bb {
         void setHp(int hp);
         int getJumpState();
         int getSprintDuration();
+        int getAbilityState();
+        int getAbility();
+        int getAbilityCount();
+        int getAbilityHold();
+        int getAbilityTimeout();
+        std::vector<Ability*>& getAbilities();
     private:
         sf::RectangleShape m_sprite;
         enum MoveState {

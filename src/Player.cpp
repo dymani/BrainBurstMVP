@@ -222,9 +222,9 @@ namespace bb {
         debug.addLine("Jump:     " + std::to_string(m_jumpState) + " " + std::string(m_jumpState == 4
             || m_jumpTimeout > 0 ? "Not OK" : "OK"));
         debug.addLine("Sprint:    " + std::to_string(m_sprintDuration));
-        debug.addLine("Ability:   " + std::to_string(int(m_abilityState)) + " (" + std::to_string(m_ability)
-            + " " + std::to_string(m_abilityCount) + " " + std::to_string(m_abilityHold)
-            + " " + std::to_string(m_abilityTimeout) + ")");
+        debug.addLine("Ability:   " + std::to_string(int(m_abilityState)) + " ("
+            + std::to_string(m_ability) + " " + std::to_string(m_abilityCount) + " "
+            + std::to_string(m_abilityHold) + " " + std::to_string(m_abilityTimeout) + ")");
         return true;
     }
 
@@ -252,6 +252,30 @@ namespace bb {
 
     int Player::getSprintDuration() {
         return m_sprintDuration;
+    }
+
+    int Player::getAbilityState() {
+        return m_abilityState;
+    }
+
+    int Player::getAbility() {
+        return m_ability;
+    }
+
+    int Player::getAbilityCount() {
+        return m_abilityCount;
+    }
+
+    int Player::getAbilityHold() {
+        return m_abilityHold;
+    }
+
+    int Player::getAbilityTimeout() {
+        return m_abilityTimeout;
+    }
+
+    std::vector<Ability*>& Player::getAbilities() {
+        return m_abilities;
     }
 
     PlayerContactListener::PlayerContactListener(Player& player) : m_player(player) {
