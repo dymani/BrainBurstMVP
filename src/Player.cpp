@@ -22,7 +22,7 @@ namespace bb {
         fixtureDef.shape = &dynamicBox;
         fixtureDef.density = 50.0f;
         fixtureDef.friction = 0.3f;
-        auto* playerFix =  m_body->CreateFixture(&fixtureDef);
+        auto* playerFix = m_body->CreateFixture(&fixtureDef);
         playerFix->SetUserData((void*)0);
 
         dynamicBox.SetAsBox(0.4f, 0.05f, b2Vec2(0, -0.5f), 0);
@@ -83,11 +83,14 @@ namespace bb {
         if(event.type == sf::Event::KeyPressed) {
             switch(event.key.code) {
                 case sf::Keyboard::W:
-                    if(m_body->GetLinearVelocity().y == 0) {
-                        m_jumpState = JS_JUMP;
-                    } else {
-                        if(m_jumpState == JS_STOP)
-                            m_jumpState = JS_DOUBLE_JUMP;
+                    if(m_jumpState == JS_STOP) {
+                        if(m_numFootContacts >= 1) {
+                            m_jumpState = JS_JUMP;
+                        } else {
+                            m_jumpState = JS_D_JUMP;
+                        }
+                    } else if(m_jumpState == JS_JUMPED) {
+                        m_jumpState = JS_D_JUMP;
                     }
                     break;
             }
@@ -161,21 +164,24 @@ namespace bb {
         }
         if(m_jumpState == JS_JUMP) {
             m_jumpState = JS_STOP;
-            if(m_numFootContacts >= 1) {
-                if(m_jumpTimeout <= 0) {
-                    if(!m_isDodging) {
-                        desiredVelY = 10.0f;
-                        m_jumpTimeout = 15;
-                    }
+            if(m_jumpTimeout <= 0) {
+                if(!m_isDodging) {
+                    desiredVelY = 10.0f;
+                    m_jumpTimeout = 10;
+                    m_jumpState = JS_JUMPED;
                 }
             }
-        } else if(m_jumpState == JS_DOUBLE_JUMP) {
-            m_jumpState = JS_DOUBLE_STOP;
+        } else if(m_jumpState == JS_D_JUMP) {
+            m_jumpState = JS_JUMPED;
             if(!m_isDodging) {
-                desiredVelY = 10.0f;
+                if(m_jumpTimeout <= 0) {
+                    desiredVelY = 10.0f;
+                    m_jumpState = JS_D_JUMPED;
+                }
             }
-        } else if(m_jumpState == JS_DOUBLE_STOP) {
-            if(m_numFootContacts >= 1) m_jumpState = JS_STOP;
+        } else if(m_jumpState == JS_JUMPED || m_jumpState == JS_D_JUMPED) {
+            int velY = int(m_body->GetLinearVelocity().y * 1000 + 0.5);
+            if(m_numFootContacts >= 1 && velY == 0) m_jumpState = JS_STOP;
         }
         float velXChange = desiredVelX - vel.x;
         float velYChange = desiredVelY - vel.y;
@@ -213,21 +219,8 @@ namespace bb {
         debug.addLine("Coord:    " + std::to_string(coord.x) + " " + std::to_string(coord.y));
         debug.addLine("Velocity: " + std::to_string(vel.x) + " " + std::to_string(vel.y));
         debug.addLine("Dodge:    " + std::string(m_isDodging ? "True" : "False"));
-        switch(m_jumpState) {
-            case JS_JUMP:
-                debug.addLine("Jump:     0 OK");
-                break;
-            case JS_DOUBLE_JUMP:
-                debug.addLine("Jump:     1 OK");
-                break;
-            case JS_STOP:
-                debug.addLine("Jump:     2 OK");
-                break;
-            case JS_DOUBLE_STOP:
-                debug.addLine("Jump:     3 Not OK");
-                break;
-
-        }
+        debug.addLine("Jump:     " + std::to_string(m_jumpState) + " " + std::string(m_jumpState == 4
+            || m_jumpTimeout > 0 ? "Not OK" : "OK"));
         debug.addLine("Sprint:    " + std::to_string(m_sprintDuration));
         debug.addLine("Ability:   " + std::to_string(int(m_abilityState)) + " (" + std::to_string(m_ability)
             + " " + std::to_string(m_abilityCount) + " " + std::to_string(m_abilityHold)
@@ -251,6 +244,14 @@ namespace bb {
 
     void Player::setHp(int hp) {
         m_hp = hp;
+    }
+
+    int Player::getJumpState() {
+        return int(m_jumpState);
+    }
+
+    int Player::getSprintDuration() {
+        return m_sprintDuration;
     }
 
     PlayerContactListener::PlayerContactListener(Player& player) : m_player(player) {

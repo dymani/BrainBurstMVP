@@ -23,13 +23,15 @@ namespace bb {
         b2Body* getBody();
         int getHp();
         void setHp(int hp);
+        int getJumpState();
+        int getSprintDuration();
     private:
         sf::RectangleShape m_sprite;
         enum MoveState {
             MS_LEFT, MS_RIGHT, MS_STOP
         } m_moveState;
         enum JumpState {
-            JS_JUMP, JS_DOUBLE_JUMP, JS_STOP, JS_DOUBLE_STOP
+            JS_STOP, JS_JUMP, JS_JUMPED, JS_D_JUMP, JS_D_JUMPED
         } m_jumpState;
         int m_jumpTimeout, m_numFootContacts;
         bool m_isSprinting, m_isDodging;

@@ -2,7 +2,7 @@
 #include "Game.h"
 
 namespace bb {
-    World::World(Game& game) : m_game(game), m_bWorld(b2Vec2(0.0f, -20.0f)) {
+    World::World(Game& game) : m_game(game), m_bWorld(b2Vec2(0.0f, -20.0f)), m_gui(*this) {
         srand(unsigned int(time(NULL)));
 
         m_font.loadFromFile("assets/system.otf");
@@ -51,6 +51,7 @@ namespace bb {
 
     void World::handleInput(sf::Event event) {
         m_player->handleInput(event);
+        m_gui.handleInput(event);
         if(event.type == sf::Event::KeyPressed) {
             switch(event.key.code) {
                 case sf::Keyboard::F3:
@@ -62,6 +63,7 @@ namespace bb {
 
     void World::handleInput() {
         m_player->handleInput();
+        m_gui.handleInput();
     }
 
     bool World::update() {
@@ -81,6 +83,7 @@ namespace bb {
         m_damages.clear();
         m_bWorld.Step(timeStep, velocityIterations, positionIterations);
         m_bWorld.ClearForces();
+        m_gui.update();
         return true;
     }
 
@@ -89,6 +92,7 @@ namespace bb {
             entity.second->draw(dt);
         }
         m_debug.draw(m_game.getWindow());
+        m_gui.draw(dt);
     }
 
     sf::RenderWindow& World::getWindow() {
@@ -105,6 +109,10 @@ namespace bb {
 
     GameContactListener* World::getContactListener() {
         return m_contactListener;
+    }
+
+    Gui& World::getGui() {
+        return m_gui;
     }
 
     void World::damage(int id, int damage) {
