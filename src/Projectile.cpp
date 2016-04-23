@@ -2,7 +2,8 @@
 #include "World.h"
 
 namespace bb {
-    Projectile::Projectile(World& world, float coordX, float coordY, float velX, float velY) : Entity(world) {
+    Projectile::Projectile(World& world, int id, float coordX, float coordY, float velX, float velY)
+        : Entity(world, id) {
         m_sprite.setSize({6.4f, 6.4f});
         m_sprite.setOrigin({3.2f, 3.2f});
         m_sprite.setFillColor(sf::Color::Red);
@@ -20,7 +21,9 @@ namespace bb {
         fixtureDef.density = 1.0f;
         fixtureDef.friction = 1.0f;
         auto* fix = m_body->CreateFixture(&fixtureDef);
-        fix->SetUserData((void*)1);
+        EntityData* data = new EntityData;
+        data->id = float(ID);
+        fix->SetUserData(data);
 
         m_body->SetLinearVelocity(b2Vec2(velX, velY));
         m_body->SetGravityScale(0.0f);
@@ -60,20 +63,22 @@ namespace bb {
     }
 
     void ProjectileContactListener::beginContact(b2Contact* contact) {
-        void* fixtureUserData = contact->GetFixtureA()->GetUserData();
-        if((int)fixtureUserData == 1)
-            m_projectile.m_hasHit = true;
-        fixtureUserData = contact->GetFixtureB()->GetUserData();
-        if((int)fixtureUserData == 1)
+        auto* ptrA = static_cast<EntityData*>(contact->GetFixtureA()->GetUserData());
+        auto* ptrB = static_cast<EntityData*>(contact->GetFixtureB()->GetUserData());
+        float a = -1.0f, b = -1.0f;
+        if(contact->GetFixtureA()->GetUserData() != NULL) a = ptrA->id;
+        if(contact->GetFixtureB()->GetUserData() != NULL) b = ptrB->id;
+        if(a == float(m_projectile.ID) || b == float(m_projectile.ID))
             m_projectile.m_hasHit = true;
     }
 
     void ProjectileContactListener::endContact(b2Contact* contact) {
-        void* fixtureUserData = contact->GetFixtureA()->GetUserData();
-        if((int)fixtureUserData == 1)
-            m_projectile.m_hasHit = true;
-        fixtureUserData = contact->GetFixtureB()->GetUserData();
-        if((int)fixtureUserData == 1)
+        auto* ptrA = static_cast<EntityData*>(contact->GetFixtureA()->GetUserData());
+        auto* ptrB = static_cast<EntityData*>(contact->GetFixtureB()->GetUserData());
+        float a = -1.0f, b = -1.0f;
+        if(contact->GetFixtureA()->GetUserData() != NULL) a = ptrA->id;
+        if(contact->GetFixtureB()->GetUserData() != NULL) b = ptrB->id;
+        if(a == float(m_projectile.ID) || b == float(m_projectile.ID))
             m_projectile.m_hasHit = true;
     }
 }

@@ -22,6 +22,10 @@ namespace bb {
         std::map<int, ContactListener*> m_listeners;
         int m_currId;
     };
+
+    struct EntityData {
+        float id;
+    };
 }
 
 #endif

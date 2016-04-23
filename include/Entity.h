@@ -9,7 +9,7 @@ namespace bb {
 
     class Entity {
     public:
-        Entity(World& world) : m_world(world) {
+        Entity(World& world, int id) : m_world(world), ID(id) {
         }
         virtual ~Entity() {
         }
@@ -18,6 +18,7 @@ namespace bb {
         virtual b2Body* getBody() = 0;
         virtual int getHp() = 0;
         virtual void setHp(int hp) = 0;
+        const int ID;
     protected:
         World& m_world;
         b2Body* m_body;

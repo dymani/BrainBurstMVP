@@ -14,7 +14,7 @@ namespace bb {
     class Player : public Entity {
         friend class PlayerContactListener;
     public:
-        Player(World& world);
+        Player(World& world, int id);
         ~Player();
         void handleInput();
         void handleInput(sf::Event event);

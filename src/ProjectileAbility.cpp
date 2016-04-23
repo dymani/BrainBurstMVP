@@ -21,7 +21,8 @@ namespace bb {
         velY = float(5 * std::sin(angle * PI / 180));
         pCoord.x += float(0.8 * std::cos(angle * PI / 180));
         pCoord.y += float(0.8 * std::sin(angle * PI / 180));
-        Projectile* projectile = new Projectile(m_world, pCoord.x, pCoord.y, velX, velY);
+        Projectile* projectile = new Projectile(m_world, m_world.getNewId(), pCoord.x, pCoord.y, velX,
+            velY);
         m_world.addEntity(projectile);
     }
 

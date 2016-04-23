@@ -39,13 +39,19 @@ namespace bb {
         m_contactListener = new GameContactListener();
         m_bWorld.SetContactListener(m_contactListener);
 
-        m_player = new Player(*this);
-        m_entities[0] = std::unique_ptr<Entity>(m_player);
+        m_player = new Player(*this, 0);
+        addEntity(m_player);
 
         Entity* enemy;
-        enemy = new Enemy(*this, 5.0f, 2.5f, 0);
+        enemy = new Enemy(*this, getNewId(), 5.0f, 2.5f, 0);
         addEntity(enemy);
-        enemy = new Enemy(*this, 8.0f, 2.5f, 1);
+        enemy = new Enemy(*this, getNewId(), 8.0f, 0.5f, 0);
+        addEntity(enemy);
+        enemy = new Enemy(*this, getNewId(), 8.0f, 1.5f, 0);
+        addEntity(enemy);
+        enemy = new Enemy(*this, getNewId(), 8.0f, 2.5f, 0);
+        addEntity(enemy);
+        enemy = new Enemy(*this, getNewId(), 10.0f, 2.5f, 2);
         addEntity(enemy);
     }
 
@@ -137,12 +143,15 @@ namespace bb {
         return m_entities[id].get();
     }
 
-    int World::addEntity(Entity* entity) {
+    int World::getNewId() {
         int id = rand() % 100;
         while(m_entities.find(id) != m_entities.end()) {
             id = rand() % 100;
         }
-        m_entities[id] = std::unique_ptr<Entity>(entity);
         return id;
+    }
+
+    void World::addEntity(Entity* entity) {
+        m_entities[entity->ID] = std::unique_ptr<Entity>(entity);
     }
 }

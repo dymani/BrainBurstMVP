@@ -10,7 +10,7 @@ namespace bb {
 
     void BasicAbility::use(Player* player, sf::Vector2f coord) {
         int entity = m_world.seekEntity(coord);
-        m_world.damage(entity, 1);
+        m_world.damage(entity, 10);
     }
 
     sf::Keyboard::Key BasicAbility::getKey() {

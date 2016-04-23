@@ -4,7 +4,7 @@
 #include "ProjectileAbility.h"
 
 namespace bb {
-    Player::Player(World& world) : Entity(world) {
+    Player::Player(World& world, int id) : Entity(world, id) {
         m_sprite.setFillColor(sf::Color::White);
         m_sprite.setSize({64.0f, 64.0f});
         m_sprite.setOrigin({32.0f, 32.0f});
@@ -23,12 +23,15 @@ namespace bb {
         fixtureDef.density = 50.0f;
         fixtureDef.friction = 0.3f;
         auto* playerFix = m_body->CreateFixture(&fixtureDef);
-        playerFix->SetUserData((void*)0);
+        EntityData* data = new EntityData;
+        data->id = float(ID);
+        playerFix->SetUserData(data);
 
         dynamicBox.SetAsBox(0.4f, 0.05f, b2Vec2(0, -0.5f), 0);
         fixtureDef.isSensor = true;
         b2Fixture* footSensorFixture = m_body->CreateFixture(&fixtureDef);
-        footSensorFixture->SetUserData((void*)3);
+        data->id = float(ID + 0.1f);
+        footSensorFixture->SetUserData(data);
 
         m_contactListener = std::unique_ptr<PlayerContactListener>(new PlayerContactListener(*this));
         m_contactListenerId = m_world.getContactListener()->addListener(m_contactListener.get());
@@ -37,6 +40,7 @@ namespace bb {
         m_jumpTimeout = 0;
         m_isSprinting = false;
         m_isDodging = false;
+        m_numFootContacts = 0;
 
         m_hp = -1;
         m_abilityState = AS_NONE;
@@ -282,20 +286,22 @@ namespace bb {
     }
 
     void PlayerContactListener::beginContact(b2Contact* contact) {
-        void* fixtureUserData = contact->GetFixtureA()->GetUserData();
-        if((int)fixtureUserData == 3)
-            m_player.m_numFootContacts++;
-        fixtureUserData = contact->GetFixtureB()->GetUserData();
-        if((int)fixtureUserData == 3)
+        auto* ptrA = static_cast<EntityData*>(contact->GetFixtureA()->GetUserData());
+        auto* ptrB = static_cast<EntityData*>(contact->GetFixtureB()->GetUserData());
+        float a = -1.0f, b = -1.0f;
+        if(contact->GetFixtureA()->GetUserData() != NULL) a = ptrA->id;
+        if(contact->GetFixtureB()->GetUserData() != NULL) b = ptrB->id;
+        if(a == float(m_player.ID + 0.1f) || b == float(m_player.ID + 0.1f))
             m_player.m_numFootContacts++;
     }
 
     void PlayerContactListener::endContact(b2Contact* contact) {
-        void* fixtureUserData = contact->GetFixtureA()->GetUserData();
-        if((int)fixtureUserData == 3)
-            m_player.m_numFootContacts--;
-        fixtureUserData = contact->GetFixtureB()->GetUserData();
-        if((int)fixtureUserData == 3)
+        auto* ptrA = static_cast<EntityData*>(contact->GetFixtureA()->GetUserData());
+        auto* ptrB = static_cast<EntityData*>(contact->GetFixtureB()->GetUserData());
+        float a = -1.0f, b = -1.0f;
+        if(contact->GetFixtureA()->GetUserData() != NULL) a = ptrA->id;
+        if(contact->GetFixtureB()->GetUserData() != NULL) b = ptrB->id;
+        if(a == float(m_player.ID + 0.1f) || b == float(m_player.ID + 0.1f))
             m_player.m_numFootContacts--;
     }
 }

@@ -11,7 +11,7 @@ namespace bb {
     class Projectile : public Entity {
         friend class ProjectileContactListener;
     public:
-        Projectile(World& world, float coordX, float coordY, float velX, float velY);
+        Projectile(World& world, int id, float coordX, float coordY, float velX, float velY);
         ~Projectile();
         bool update();
         void draw(const double dt);
