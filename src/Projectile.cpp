@@ -25,10 +25,15 @@ namespace bb {
         m_body->SetLinearVelocity(b2Vec2(velX, velY));
         m_body->SetGravityScale(0.0f);
 
-        m_contactListener = new ProjectileContactListener(*this);
-        m_world.getBWorld().SetContactListener(m_contactListener);
+        m_contactListener = std::unique_ptr<ProjectileContactListener>(new
+            ProjectileContactListener(*this));
+        m_contactListenerId = m_world.getContactListener()->addListener(m_contactListener.get());
 
         m_hasHit = false;
+    }
+
+    Projectile::~Projectile() {
+        m_world.getContactListener()->removeListener(m_contactListenerId);
     }
 
     bool Projectile::update() {
@@ -54,7 +59,7 @@ namespace bb {
     ProjectileContactListener::ProjectileContactListener(Projectile& projectile) : m_projectile(projectile) {
     }
 
-    void ProjectileContactListener::BeginContact(b2Contact* contact) {
+    void ProjectileContactListener::beginContact(b2Contact* contact) {
         void* fixtureUserData = contact->GetFixtureA()->GetUserData();
         if((int)fixtureUserData == 1)
             m_projectile.m_hasHit = true;
@@ -63,7 +68,7 @@ namespace bb {
             m_projectile.m_hasHit = true;
     }
 
-    void ProjectileContactListener::EndContact(b2Contact* contact) {
+    void ProjectileContactListener::endContact(b2Contact* contact) {
         void* fixtureUserData = contact->GetFixtureA()->GetUserData();
         if((int)fixtureUserData == 1)
             m_projectile.m_hasHit = true;

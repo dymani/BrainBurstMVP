@@ -2,8 +2,10 @@
 #define PLAYER_H
 
 #include <iostream>
+#include <memory>
 #include "Entity.h"
 #include "Ability.h"
+#include "ContactListener.h"
 
 namespace bb {
     class World;
@@ -13,6 +15,7 @@ namespace bb {
         friend class PlayerContactListener;
     public:
         Player(World& world);
+        ~Player();
         void handleInput();
         void handleInput(sf::Event event);
         bool update();
@@ -31,7 +34,8 @@ namespace bb {
         int m_jumpTimeout, m_numFootContacts;
         bool m_isSprinting, m_isDodging;
         int m_sprintDuration;
-        PlayerContactListener* m_contactListener;
+        std::unique_ptr<PlayerContactListener> m_contactListener;
+        int m_contactListenerId;
         enum AbilityState {
             AS_NONE, AS_COUNT, AS_HOLD, AS_USE
         } m_abilityState;
@@ -39,11 +43,11 @@ namespace bb {
         std::vector<Ability*> m_abilities;
     };
 
-    class PlayerContactListener : public b2ContactListener {
+    class PlayerContactListener : public ContactListener {
     public:
         PlayerContactListener(Player& player);
-        void BeginContact(b2Contact* contact);
-        void EndContact(b2Contact* contact);
+        void beginContact(b2Contact* contact);
+        void endContact(b2Contact* contact);
     private:
         Player& m_player;
     };

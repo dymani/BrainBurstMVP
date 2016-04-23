@@ -1,7 +1,9 @@
 #ifndef PROJECTILE_H
 #define PROJECTILE_H
 
+#include <memory>
 #include "Entity.h"
+#include "ContactListener.h"
 
 namespace bb {
     class World;
@@ -10,6 +12,7 @@ namespace bb {
         friend class ProjectileContactListener;
     public:
         Projectile(World& world, float coordX, float coordY, float velX, float velY);
+        ~Projectile();
         bool update();
         void draw(const double dt);
         b2Body* getBody();
@@ -17,15 +20,16 @@ namespace bb {
         void setHp(int hp);
     private:
         sf::RectangleShape m_sprite;
-        ProjectileContactListener* m_contactListener;
+        std::unique_ptr<ProjectileContactListener> m_contactListener;
+        int m_contactListenerId;
         bool m_hasHit;
     };
 
-    class ProjectileContactListener : public b2ContactListener {
+    class ProjectileContactListener : public ContactListener {
     public:
         ProjectileContactListener(Projectile& projectile);
-        void BeginContact(b2Contact* contact);
-        void EndContact(b2Contact* contact);
+        void beginContact(b2Contact* contact);
+        void endContact(b2Contact* contact);
     private:
         Projectile& m_projectile;
     };

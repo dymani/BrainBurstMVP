@@ -30,8 +30,8 @@ namespace bb {
         b2Fixture* footSensorFixture = m_body->CreateFixture(&fixtureDef);
         footSensorFixture->SetUserData((void*)3);
 
-        m_contactListener = new PlayerContactListener(*this);
-        m_world.getBWorld().SetContactListener(m_contactListener);
+        m_contactListener = std::unique_ptr<PlayerContactListener>(new PlayerContactListener(*this));
+        m_contactListenerId = m_world.getContactListener()->addListener(m_contactListener.get());
 
         m_jumpState = JS_STOP;
         m_jumpTimeout = 0;
@@ -43,6 +43,10 @@ namespace bb {
         m_ability = -1;
         m_abilities.push_back(new BasicAbility(m_world, sf::Keyboard::Num1));
         m_abilities.push_back(new ProjectileAbility(m_world, sf::Keyboard::Num2));
+    }
+
+    Player::~Player() {
+        m_world.getContactListener()->removeListener(m_contactListenerId);
     }
 
     void Player::handleInput() {
@@ -252,7 +256,7 @@ namespace bb {
     PlayerContactListener::PlayerContactListener(Player& player) : m_player(player) {
     }
 
-    void PlayerContactListener::BeginContact(b2Contact* contact) {
+    void PlayerContactListener::beginContact(b2Contact* contact) {
         void* fixtureUserData = contact->GetFixtureA()->GetUserData();
         if((int)fixtureUserData == 3)
             m_player.m_numFootContacts++;
@@ -261,7 +265,7 @@ namespace bb {
             m_player.m_numFootContacts++;
     }
 
-    void PlayerContactListener::EndContact(b2Contact* contact) {
+    void PlayerContactListener::endContact(b2Contact* contact) {
         void* fixtureUserData = contact->GetFixtureA()->GetUserData();
         if((int)fixtureUserData == 3)
             m_player.m_numFootContacts--;

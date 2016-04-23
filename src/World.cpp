@@ -36,6 +36,9 @@ namespace bb {
         fixtureDef.shape = &groundBox;
         m_borderU->CreateFixture(&fixtureDef);
 
+        m_contactListener = new GameContactListener();
+        m_bWorld.SetContactListener(m_contactListener);
+
         m_player = new Player(*this);
         m_entities[0] = std::unique_ptr<Entity>(m_player);
 
@@ -98,6 +101,10 @@ namespace bb {
 
     b2World& World::getBWorld() {
         return m_bWorld;
+    }
+
+    GameContactListener* World::getContactListener() {
+        return m_contactListener;
     }
 
     void World::damage(int id, int damage) {
