@@ -44,29 +44,33 @@ namespace bb {
                 fixtureDef.shape = &dynamicBox;
                 fixtureDef.density = 30.0f;
                 fixtureDef.friction = 0.3f;
-                auto* fix = m_body->CreateFixture(&fixtureDef);
+                m_body->CreateFixture(&fixtureDef);
                 if(m_type == T_HOSTILE) {
-                    EntityData* data = new EntityData;
-                    data->id = float(ID);
-                    fix->SetUserData(data);
+                    dynamicBox.SetAsBox(0.55f, 0.55f, b2Vec2(0, 0), 0);
+                    fixtureDef.isSensor = true;
+                    auto* sensorFixture = m_body->CreateFixture(&fixtureDef);
+                    auto* data = new EntityData;
+                    data->id = float(ID + 0.1f);
+                    sensorFixture->SetUserData(data);
 
                     dynamicBox.SetAsBox(0.4f, 0.05f, b2Vec2(0, -0.5f), 0);
                     fixtureDef.isSensor = true;
-                    b2Fixture* footSensorFixture = m_body->CreateFixture(&fixtureDef);
-                    data->id = float(ID + 0.1f);
-                    footSensorFixture->SetUserData(data);
+                    sensorFixture = m_body->CreateFixture(&fixtureDef);
+                    data = new EntityData;
+                    data->id = float(ID + 0.2f);
+                    sensorFixture->SetUserData(data);
 
                     m_contactListener = std::unique_ptr<EnemyContactListener>(new
                         EnemyContactListener(*this));
                     m_contactListenerId = m_world.getContactListener()->addListener(m_contactListener.get());
 
                     m_numFootContacts = 0;
+                    m_hasHit = false;
                 }
                 break;
         }
 
         m_hp = 5;
-        m_hasHit = false;
         m_hitTimeout = 0;
     }
 
@@ -81,9 +85,9 @@ namespace bb {
             float desiredVelX = 0.0f;
             float desiredVelY = vel.y;
             if(playerPos.x > m_body->GetPosition().x) {
-                    desiredVelX = 3.0f;
+                desiredVelX = 3.0f;
             } else {
-                    desiredVelX = -3.0f;
+                desiredVelX = -3.0f;
             }
             float xDiff = m_body->GetPosition().x - playerPos.x;
             if(xDiff < 0.5f && xDiff > -0.5f)
@@ -96,9 +100,7 @@ namespace bb {
                 if(m_hitTimeout < 0) {
                     m_world.damage(0, 1);
                     m_hitTimeout = 50;
-                    std::cout << "damage\n";
                 }
-                m_hasHit = false;
             }
             float velXChange = desiredVelX - vel.x;
             float velYChange = desiredVelY - vel.y;
@@ -136,9 +138,12 @@ namespace bb {
         float a = -1.0f, b = -1.0f;
         if(contact->GetFixtureA()->GetUserData() != NULL) a = ptrA->id;
         if(contact->GetFixtureB()->GetUserData() != NULL) b = ptrB->id;
-        if((a == float(m_enemy.ID) && b == 0) || (b == float(m_enemy.ID) && a == 0))
-            m_enemy.m_hasHit = true;
-        else if(a == float(m_enemy.ID + 0.1f) || b == float(m_enemy.ID + 0.1f))
+        if(a == float(m_enemy.ID) + 0.1f || b == float(m_enemy.ID) + 0.1f) {
+            if(b == 0.0f || a == 0.0f) {
+                m_enemy.m_hasHit = true;
+            }
+        }
+        if(a == float(m_enemy.ID) + 0.2f || b == float(m_enemy.ID) + 0.2f)
             m_enemy.m_numFootContacts++;
     }
 
@@ -148,7 +153,12 @@ namespace bb {
         float a = -1.0f, b = -1.0f;
         if(contact->GetFixtureA()->GetUserData() != NULL) a = ptrA->id;
         if(contact->GetFixtureB()->GetUserData() != NULL) b = ptrB->id;
-        if(a == float(m_enemy.ID + 0.1f) || b == float(m_enemy.ID + 0.1f))
+        if(a == float(m_enemy.ID) + 0.1f || b == float(m_enemy.ID) + 0.1f) {
+            if(b == 0.0f || a == 0.0f) {
+                m_enemy.m_hasHit = false;
+            }
+        }
+        if(a == float(m_enemy.ID) + 0.2f || b == float(m_enemy.ID) + 0.2f)
             m_enemy.m_numFootContacts--;
     }
 }
