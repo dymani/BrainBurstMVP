@@ -10,6 +10,7 @@
 #include "Enemy.h"
 #include "ContactListener.h"
 #include "Gui.h"
+#include "View.h"
 
 namespace bb {
     class Game;
@@ -26,6 +27,7 @@ namespace bb {
         b2World& getBWorld();
         GameContactListener* getContactListener();
         Gui& getGui();
+        View& getView();
         void damage(int id, int damage);
         sf::Vector2f mapPixelToCoord(sf::Vector2i pixel);
         int seekEntity(sf::Vector2f coord);
@@ -42,6 +44,7 @@ namespace bb {
         b2World m_bWorld;
         GameContactListener* m_contactListener;
         Gui m_gui;
+        View m_view;
         Player* m_player;
         b2Body* m_ground;
         b2Body* m_borderL;

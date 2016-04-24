@@ -139,6 +139,7 @@
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\Projectile.cpp" />
     <ClCompile Include="src\ProjectileAbility.cpp" />
+    <ClCompile Include="src\View.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +154,7 @@
     <ClInclude Include="include\Player.h" />
     <ClInclude Include="include\Projectile.h" />
     <ClInclude Include="include\ProjectileAbility.h" />
+    <ClInclude Include="include\View.h" />
     <ClInclude Include="include\World.h" />
   </ItemGroup>
   <ItemGroup>
