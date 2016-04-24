@@ -18,6 +18,8 @@ namespace bb {
                 break;
         }
 
+        m_contactListenerId = -1;
+
         b2BodyDef bodyDef;
         b2PolygonShape dynamicBox;
         b2FixtureDef fixtureDef;
@@ -34,6 +36,8 @@ namespace bb {
                 m_body->CreateFixture(&fixtureDef);
                 break;
             case T_MOBILE:
+                m_moveState = MoveState(rand() % 3);
+                m_moveTime = rand() % 100 + 150;
             case T_HOSTILE:
                 bodyDef.type = b2_dynamicBody;
                 bodyDef.position.Set(coordX, coordY);
@@ -45,25 +49,26 @@ namespace bb {
                 fixtureDef.density = 30.0f;
                 fixtureDef.friction = 0.3f;
                 m_body->CreateFixture(&fixtureDef);
+
                 if(m_type == T_HOSTILE) {
-                    dynamicBox.SetAsBox(0.55f, 0.55f, b2Vec2(0, 0), 0);
+                    dynamicBox.SetAsBox(0.4f, 0.05f, b2Vec2(0, -0.5f), 0);
                     fixtureDef.isSensor = true;
                     auto* sensorFixture = m_body->CreateFixture(&fixtureDef);
                     auto* data = new EntityData;
-                    data->id = float(ID + 0.1f);
+                    data->id = float(ID + 0.2f);
                     sensorFixture->SetUserData(data);
 
-                    dynamicBox.SetAsBox(0.4f, 0.05f, b2Vec2(0, -0.5f), 0);
+                    dynamicBox.SetAsBox(0.55f, 0.55f, b2Vec2(0, 0), 0);
                     fixtureDef.isSensor = true;
                     sensorFixture = m_body->CreateFixture(&fixtureDef);
                     data = new EntityData;
-                    data->id = float(ID + 0.2f);
+                    data->id = float(ID + 0.1f);
                     sensorFixture->SetUserData(data);
 
                     m_contactListener = std::unique_ptr<EnemyContactListener>(new
                         EnemyContactListener(*this));
-                    m_contactListenerId = m_world.getContactListener()->addListener(m_contactListener.get());
-
+                    m_contactListenerId = m_world.getContactListener()->addListener(m_contactListener
+                        .get());
                     m_numFootContacts = 0;
                     m_hasHit = false;
                 }
@@ -75,11 +80,34 @@ namespace bb {
     }
 
     Enemy::~Enemy() {
-        m_world.getContactListener()->removeListener(m_contactListenerId);
+        if(m_contactListenerId != -1)
+            m_world.getContactListener()->removeListener(m_contactListenerId);
     }
 
     bool Enemy::update() {
-        if(m_type == T_HOSTILE) {
+        if(m_type == T_MOBILE) {
+            auto vel = m_body->GetLinearVelocity();
+            float desiredVelX = 0.0f;
+            m_moveTime--;
+            switch(m_moveState) {
+                case MS_LEFT:
+                    desiredVelX = -1.0f;
+                    break;
+                case MS_RIGHT:
+                    desiredVelX = 1.0f;
+                    break;
+            }
+            if(m_moveTime <= 0 || int(vel.x * 1000 + 0.5f) == 0) {
+                int newState = rand() % 3;
+                if(int(m_moveState) == newState)
+                    newState = (newState + rand() % 2 + 1) % 3;
+                m_moveState = MoveState(newState);
+                m_moveTime = rand() % 50 + 150;
+            }
+            float velXChange = desiredVelX - vel.x;
+            float impulseX = m_body->GetMass() * velXChange;
+            m_body->ApplyLinearImpulse(b2Vec2(impulseX, 0), m_body->GetWorldCenter(), true);
+        } else if(m_type == T_HOSTILE) {
             auto playerPos = m_world.getEntity(0)->getBody()->GetPosition();
             auto vel = m_body->GetLinearVelocity();
             float desiredVelX = 0.0f;

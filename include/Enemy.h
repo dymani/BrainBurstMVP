@@ -27,6 +27,10 @@ namespace bb {
         bool m_hasHit;
         int m_hitTimeout;
         int m_numFootContacts;
+        enum MoveState {
+            MS_IDLE, MS_LEFT, MS_RIGHT
+        } m_moveState;
+        int m_moveTime;
     };
 
     class EnemyContactListener : public ContactListener {

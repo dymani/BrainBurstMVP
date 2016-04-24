@@ -14,7 +14,11 @@ namespace bb {
 
         b2PolygonShape groundBox;
         groundBox.SetAsBox(20.0f, 1.0f);
-        m_ground->CreateFixture(&groundBox, 0.0f);
+        b2FixtureDef groundFix;
+        groundFix.friction = 0.6f;
+        groundFix.shape = &groundBox;
+        groundFix.density = 0.0f;
+        m_ground->CreateFixture(&groundFix);
 
         b2BodyDef borderBodyDef;
         borderBodyDef.position.Set(-1.0f, 0.0f);
@@ -51,7 +55,7 @@ namespace bb {
         addEntity(enemy);
         enemy = new Enemy(*this, getNewId(), 8.0f, 2.5f, 0);
         addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 10.0f, 2.5f, 2);
+        enemy = new Enemy(*this, getNewId(), 10.0f, 2.5f, 1);
         addEntity(enemy);
     }
 
