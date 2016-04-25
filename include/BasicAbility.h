@@ -11,6 +11,7 @@ namespace bb {
         sf::Keyboard::Key getKey();
         int getHold();
         int getTimeout();
+        int getAp();
     private:
 
     };

@@ -4,7 +4,7 @@
 #include "ProjectileAbility.h"
 
 namespace bb {
-    Player::Player(World& world, int id) : Entity(world, id) {
+    Player::Player(World& world, int id) : Entity(world, id, Entity::PLAYER) {
         m_sprite.setFillColor(sf::Color::White);
         m_sprite.setSize({64.0f, 64.0f});
         m_sprite.setOrigin({32.0f, 32.0f});
@@ -24,14 +24,16 @@ namespace bb {
         fixtureDef.friction = 0.3f;
         auto* playerFix = m_body->CreateFixture(&fixtureDef);
         EntityData* data = new EntityData;
-        data->id = float(ID);
+        data->id = ID;
+        data->subId = 0;
         playerFix->SetUserData(data);
 
-        dynamicBox.SetAsBox(0.4f, 0.05f, b2Vec2(0, -0.5f), 0);
+        dynamicBox.SetAsBox(0.49f, 0.05f, b2Vec2(0, -0.5f), 0);
         fixtureDef.isSensor = true;
         b2Fixture* footSensorFixture = m_body->CreateFixture(&fixtureDef);
         data = new EntityData;
-        data->id = float(ID + 0.1f);
+        data->id = ID;
+        data->subId = 1;
         footSensorFixture->SetUserData(data);
 
         m_contactListener = std::unique_ptr<PlayerContactListener>(new PlayerContactListener(*this));
@@ -43,11 +45,13 @@ namespace bb {
         m_isDodging = false;
         m_numFootContacts = 0;
 
-        m_hp = -1;
+        m_hp = 100;
+        m_ap = 0;
         m_abilityState = AS_NONE;
         m_ability = -1;
         m_abilities.push_back(new BasicAbility(m_world, sf::Keyboard::Num1));
         m_abilities.push_back(new ProjectileAbility(m_world, sf::Keyboard::Num2));
+        m_killedBy = -1;
     }
 
     Player::~Player() {
@@ -101,10 +105,11 @@ namespace bb {
             }
             if(m_abilityState == AS_NONE) {
                 for(auto a : m_abilities) {
-                    if(event.key.code == a->getKey()) {
+                    if(event.key.code == a->getKey() && m_ap >= a->getAp()) {
                         m_ability = std::find(m_abilities.begin(), m_abilities.end(), a) - m_abilities.begin();
                         m_abilityState = AS_COUNT;
                         m_abilityCount = -50;
+                        m_ap -= a->getAp();
                         break;
                     }
                 }
@@ -114,11 +119,15 @@ namespace bb {
                 auto coord = m_world.mapPixelToCoord(sf::Mouse::getPosition(m_world.getWindow()));
                 if(m_abilityState == AS_NONE) {
                     int entity = m_world.seekEntity(coord);
-                    double distance = std::sqrt(double(
-                        (coord.x - m_body->GetPosition().x) * (coord.x - m_body->GetPosition().x) +
-                        (coord.y - m_body->GetPosition().y) * (coord.y - m_body->GetPosition().y)));
-                    if(distance < 5)
-                        m_world.damage(entity, 1);
+                    if(entity != -1) {
+                        m_ap += 2;
+                        m_ap = m_ap > 100 ? 100 : m_ap;
+                        double distance = std::sqrt(double(
+                            (coord.x - m_body->GetPosition().x) * (coord.x - m_body->GetPosition().x) +
+                            (coord.y - m_body->GetPosition().y) * (coord.y - m_body->GetPosition().y)));
+                        if(distance < 5)
+                            m_world.damage(ID, entity, 10);
+                    }
                 }
             }
         } else if(event.type == sf::Event::MouseButtonReleased) {
@@ -230,6 +239,19 @@ namespace bb {
         debug.addLine("Ability:   " + std::to_string(int(m_abilityState)) + " ("
             + std::to_string(m_ability) + " " + std::to_string(m_abilityCount) + " "
             + std::to_string(m_abilityHold) + " " + std::to_string(m_abilityTimeout) + ")");
+        debug.addLine("Foots:     " + std::to_string(m_numFootContacts));
+        if(m_hp <= 0) {
+            if(m_killedBy == -1) {
+                m_bp -= 10;
+            } else {
+                switch(m_world.getEntity(m_killedBy)->TYPE) {
+                    case Entity::PLAYER: m_bp -= 10; break;
+                    case Entity::OBJECT: m_bp -= 10; break;
+                    case Entity::ENEMY: m_bp -= 10; break;
+                }
+            }
+            return false;
+        }
         return true;
     }
 
@@ -247,8 +269,26 @@ namespace bb {
         return m_hp;
     }
 
-    void Player::setHp(int hp) {
+    void Player::setHp(int hp, int entity) {
+        if(hp < m_hp) {
+            m_ap += (m_hp - hp) * 2;
+            m_ap = m_ap > 100 ? 100 : m_ap;
+        }
         m_hp = hp;
+        if(m_hp <= 0)
+            m_killedBy = entity;
+    }
+
+    int Player::getAp() {
+        return m_ap;
+    }
+
+    void Player::setBp(int bp) {
+        m_bp = bp;
+    }
+
+    int Player::getBp() {
+        return m_bp;
     }
 
     int Player::getJumpState() {
@@ -286,23 +326,23 @@ namespace bb {
     PlayerContactListener::PlayerContactListener(Player& player) : m_player(player) {
     }
 
-    void PlayerContactListener::beginContact(b2Contact* contact) {
-        auto* ptrA = static_cast<EntityData*>(contact->GetFixtureA()->GetUserData());
-        auto* ptrB = static_cast<EntityData*>(contact->GetFixtureB()->GetUserData());
-        float a = -1.0f, b = -1.0f;
-        if(contact->GetFixtureA()->GetUserData() != NULL) a = ptrA->id;
-        if(contact->GetFixtureB()->GetUserData() != NULL) b = ptrB->id;
-        if(a == float(m_player.ID) + 0.1f || b == float(m_player.ID) + 0.1f)
-            m_player.m_numFootContacts++;
+    void PlayerContactListener::beginContact(EntityData* a, EntityData* b) {
+        if(a->id == m_player.ID) {
+            if(a->subId == 1)
+                m_player.m_numFootContacts++;
+        } else if(b->id == m_player.ID) {
+            if(b->subId == 1)
+                m_player.m_numFootContacts++;
+        }
     }
 
-    void PlayerContactListener::endContact(b2Contact* contact) {
-        auto* ptrA = static_cast<EntityData*>(contact->GetFixtureA()->GetUserData());
-        auto* ptrB = static_cast<EntityData*>(contact->GetFixtureB()->GetUserData());
-        float a = -1.0f, b = -1.0f;
-        if(contact->GetFixtureA()->GetUserData() != NULL) a = ptrA->id;
-        if(contact->GetFixtureB()->GetUserData() != NULL) b = ptrB->id;
-        if(a == float(m_player.ID) + 0.1f || b == float(m_player.ID) + 0.1f)
-            m_player.m_numFootContacts--;
+    void PlayerContactListener::endContact(EntityData* a, EntityData* b) {
+        if(a->id == m_player.ID) {
+            if(a->subId == 1)
+                m_player.m_numFootContacts--;
+        } else if(b->id == m_player.ID) {
+            if(b->subId == 1)
+                m_player.m_numFootContacts--;
+        }
     }
 }

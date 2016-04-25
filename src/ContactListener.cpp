@@ -17,14 +17,22 @@ namespace bb {
     }
 
     void GameContactListener::BeginContact(b2Contact* contact) {
+        auto* ptrA = static_cast<EntityData*>((void*)contact->GetFixtureA()->GetUserData());
+        auto* ptrB = static_cast<EntityData*>((void*)contact->GetFixtureB()->GetUserData());
+        if(ptrA == nullptr) ptrA = new EntityData;
+        if(ptrB == nullptr) ptrB = new EntityData;
         for(auto& listener : m_listeners) {
-            listener.second->beginContact(contact);
+            listener.second->beginContact(ptrA, ptrB);
         }
     }
 
     void GameContactListener::EndContact(b2Contact* contact) {
+        auto* ptrA = static_cast<EntityData*>((void*)contact->GetFixtureA()->GetUserData());
+        auto* ptrB = static_cast<EntityData*>((void*)contact->GetFixtureB()->GetUserData());
+        if(ptrA == nullptr) ptrA = new EntityData;
+        if(ptrB == nullptr) ptrB = new EntityData;
         for(auto& listener : m_listeners) {
-            listener.second->endContact(contact);
+            listener.second->endContact(ptrA, ptrB);
         }
     }
 }

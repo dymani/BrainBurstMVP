@@ -16,10 +16,10 @@ namespace bb {
         void draw(const double dt);
         b2Body* getBody();
         int getHp();
-        void setHp(int hp);
+        void setHp(int hp, int entity);
     private:
-        const enum Type {
-            T_STATIC, T_MOBILE, T_HOSTILE
+        const enum EnemyType {
+            T_STATIC, T_PASSIVE , T_HOSTILE
         } m_type;
         sf::RectangleShape m_sprite;
         std::unique_ptr<EnemyContactListener> m_contactListener;
@@ -31,13 +31,17 @@ namespace bb {
             MS_IDLE, MS_LEFT, MS_RIGHT
         } m_moveState;
         int m_moveTime;
+        int m_killedBy;
+        bool m_needJump;
+        int m_jumpTimeout;
+        int m_aggro, m_aggroTimeout;
     };
 
     class EnemyContactListener : public ContactListener {
     public:
         EnemyContactListener(Enemy& enemy);
-        void beginContact(b2Contact* contact);
-        void endContact(b2Contact* contact);
+        void beginContact(EntityData* a, EntityData* b);
+        void endContact(EntityData* a, EntityData* b);
     private:
         Enemy& m_enemy;
     };

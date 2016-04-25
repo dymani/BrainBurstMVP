@@ -4,6 +4,7 @@
 #include <time.h>
 #include <stack>
 #include <windows.h>
+#include <memory>
 #include <SFML/Graphics.hpp>
 #include "World.h"
 
@@ -15,7 +16,7 @@ namespace bb {
         ~Game();
         int run();
         void handleInput();
-        bool update();
+        int update();
         void draw(const double dt);
         sf::RenderWindow& getWindow();
     private:
@@ -23,7 +24,7 @@ namespace bb {
             RUNNING, QUIT
         } m_state;
         sf::RenderWindow m_window;
-        World m_world;
+        std::unique_ptr<World> m_world;
     };
 }
 

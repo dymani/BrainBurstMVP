@@ -8,6 +8,7 @@ namespace bb {
 
         m_font.loadFromFile("assets/system.otf");
         m_debug.init(m_font);
+        m_gui.setFont(m_font);
 
         b2BodyDef groundBodyDef;
         groundBodyDef.position.Set(0.0f, -1.0f);
@@ -58,7 +59,7 @@ namespace bb {
         addEntity(enemy);
         enemy = new Enemy(*this, getNewId(), 8.0f, 8.5f, 0);
         addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 10.0f, 2.5f, 1);
+        enemy = new Enemy(*this, getNewId(), 3.0f, 2.5f, 1);
         addEntity(enemy);
     }
 
@@ -70,6 +71,9 @@ namespace bb {
                 case sf::Keyboard::F3:
                     m_debug.toggle();
                     break;
+                case sf::Keyboard::R:
+                    m_restart = true;
+                    break;
             }
         }
     }
@@ -79,19 +83,23 @@ namespace bb {
         m_gui.handleInput();
     }
 
-    bool World::update() {
+    int World::update() {
         m_debug.reset();
         for(auto entity = m_entities.cbegin(); entity != m_entities.cend();) {
             if(entity->second->update()) {
                 ++entity;
             } else {
-                m_bWorld.DestroyBody(entity->second->getBody());
-                m_entities.erase(entity++);
+                if(entity->first == 0) {
+                    return 1;
+                } else {
+                    m_bWorld.DestroyBody(entity->second->getBody());
+                    m_entities.erase(entity++);
+                }
             }
         }
         for(auto damage : m_damages) {
-            if(m_entities.count(damage.first) > 0)
-                m_entities[damage.first]->setHp(m_entities[damage.first]->getHp() - damage.second);
+            if(m_entities.count(damage.y) > 0)
+                m_entities[damage.y]->setHp(m_entities[damage.y]->getHp() - damage.z, damage.x);
         }
         m_damages.clear();
         m_bWorld.Step(timeStep, velocityIterations, positionIterations);
@@ -135,7 +143,9 @@ namespace bb {
         view.y += viewVel;
         if(view.y < 4.2f) view.y = 4.2f;
         m_view.setCoord(view);
-        return true;
+        if(m_restart)
+            return 1;
+        return 0;
     }
 
     void World::draw(const double dt) {
@@ -144,8 +154,8 @@ namespace bb {
             entity.second->draw(dt);
         }
         m_game.getWindow().setView(m_game.getWindow().getDefaultView());
-        m_debug.draw(m_game.getWindow());
         m_gui.draw(dt);
+        m_debug.draw(m_game.getWindow());
     }
 
     sf::RenderWindow& World::getWindow() {
@@ -172,8 +182,8 @@ namespace bb {
         return m_view;
     }
 
-    void World::damage(int id, int damage) {
-        m_damages.push_back({id, damage});
+    void World::damage(int id, int target, int damage) {
+        m_damages.push_back({id, target, damage});
     }
 
     sf::Vector2f World::mapPixelToCoord(sf::Vector2i pixel) {

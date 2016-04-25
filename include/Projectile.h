@@ -11,25 +11,27 @@ namespace bb {
     class Projectile : public Entity {
         friend class ProjectileContactListener;
     public:
-        Projectile(World& world, int id, float coordX, float coordY, float velX, float velY);
+        Projectile(World& world, int id, float coordX, float coordY, float velX, float velY, int owner);
         ~Projectile();
         bool update();
         void draw(const double dt);
         b2Body* getBody();
         int getHp();
-        void setHp(int hp);
+        void setHp(int hp, int entity);
     private:
         sf::RectangleShape m_sprite;
         std::unique_ptr<ProjectileContactListener> m_contactListener;
         int m_contactListenerId;
+        int m_owner;
         bool m_hasHit;
+        int m_entityHit;
     };
 
     class ProjectileContactListener : public ContactListener {
     public:
         ProjectileContactListener(Projectile& projectile);
-        void beginContact(b2Contact* contact);
-        void endContact(b2Contact* contact);
+        void beginContact(EntityData* a, EntityData* b);
+        void endContact(EntityData* a, EntityData* b);
     private:
         Projectile& m_projectile;
     };

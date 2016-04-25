@@ -5,10 +5,15 @@
 #include <map>
 
 namespace bb {
+    struct EntityData {
+        int id = -1;
+        int subId = -1;
+    };
+
     class ContactListener {
     public:
-        virtual void beginContact(b2Contact* contact) = 0;
-        virtual void endContact(b2Contact* contact) = 0;
+        virtual void beginContact(EntityData* a, EntityData* b) = 0;
+        virtual void endContact(EntityData* a, EntityData* b) = 0;
     };
 
     class GameContactListener : public b2ContactListener {
@@ -21,10 +26,6 @@ namespace bb {
     private:
         std::map<int, ContactListener*> m_listeners;
         int m_currId;
-    };
-
-    struct EntityData {
-        float id;
     };
 }
 

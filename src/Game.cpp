@@ -1,21 +1,32 @@
 #include "Game.h"
 
 namespace bb {
-    Game::Game() : m_world(*this) {
+    Game::Game() {
 
     }
 
-    Game::~Game(){
+    Game::~Game() {
 
     }
 
-    int Game::run(){
+    int Game::run() {
         m_window.create(sf::VideoMode(960, 540), "Brain Burst [MVP]", sf::Style::Close);
         clock_t previous, lag, current, elapsed;
         previous = clock();
         lag = 0;
         bool isRunning = true;
+        int restart = -1;
         while(isRunning) {
+            if(restart != 0) {
+                int bp = 100;
+                if(restart == 1) {
+                    bp = dynamic_cast<Player*>(m_world->getEntity(0))->getBp();
+                    if(bp <= 0) isRunning = false;
+                }
+                m_world.reset(new World(*this));
+                dynamic_cast<Player*>(m_world->getEntity(0))->setBp(bp);
+                restart = 0;
+            }
             current = clock();
             elapsed = current - previous;
             previous = current;
@@ -24,7 +35,11 @@ namespace bb {
             handleInput();
 
             while(lag >= MS_PER_UPDATE) {
-                isRunning = update();
+                int i = update();
+                if(i == -1)
+                    isRunning = false;
+                else if(i == 1)
+                    restart = 1;
                 lag -= MS_PER_UPDATE;
             }
 
@@ -36,11 +51,11 @@ namespace bb {
         return 0;
     }
 
-    void Game::handleInput(){
+    void Game::handleInput() {
         sf::Event windowEvent;
-        m_world.handleInput();
+        m_world->handleInput();
         while(m_window.pollEvent(windowEvent)) {
-            m_world.handleInput(windowEvent);
+            m_world->handleInput(windowEvent);
             if(windowEvent.type == sf::Event::Closed) {
                 m_state = QUIT;
                 return;
@@ -54,18 +69,19 @@ namespace bb {
         }
     }
 
-    bool Game::update(){
-        if(!m_world.update()) m_state = QUIT;
-        if(m_state == QUIT) {
+    int Game::update() {
+        int update = m_world->update();
+        if(update == 1) return 1;
+        if(m_state == QUIT || update == -1) {
             m_window.close();
-            return false;
+            return -1;
         }
-        return true;
+        return 0;
     }
 
-    void Game::draw(const double dt){
+    void Game::draw(const double dt) {
         m_window.clear();
-        m_world.draw(dt);
+        m_world->draw(dt);
         m_window.display();
     }
 

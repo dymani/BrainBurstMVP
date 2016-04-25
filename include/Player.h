@@ -22,7 +22,10 @@ namespace bb {
         void draw(const double dt);
         b2Body* getBody();
         int getHp();
-        void setHp(int hp);
+        void setHp(int hp, int entity);
+        int getAp();
+        void setBp(int bp);
+        int getBp();
         int getJumpState();
         int getSprintDuration();
         int getAbilityState();
@@ -49,13 +52,15 @@ namespace bb {
         } m_abilityState;
         int m_ability, m_abilityCount, m_abilityHold, m_abilityTimeout;
         std::vector<Ability*> m_abilities;
+        int m_ap, m_bp;
+        int m_killedBy;
     };
 
     class PlayerContactListener : public ContactListener {
     public:
         PlayerContactListener(Player& player);
-        void beginContact(b2Contact* contact);
-        void endContact(b2Contact* contact);
+        void beginContact(EntityData* a, EntityData* b);
+        void endContact(EntityData* a, EntityData* b);
     private:
         Player& m_player;
     };

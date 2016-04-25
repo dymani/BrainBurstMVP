@@ -20,7 +20,7 @@ namespace bb {
         World(Game& game);
         void handleInput(sf::Event event);
         void handleInput();
-        bool update();
+        int update();
         void draw(const double dt);
         sf::RenderWindow& getWindow();
         Debug& getDebug();
@@ -28,7 +28,7 @@ namespace bb {
         GameContactListener* getContactListener();
         Gui& getGui();
         View& getView();
-        void damage(int id, int damage);
+        void damage(int id, int target, int damage);
         sf::Vector2f mapPixelToCoord(sf::Vector2i pixel);
         int seekEntity(sf::Vector2f coord);
         Entity* getEntity(int id);
@@ -51,7 +51,8 @@ namespace bb {
         b2Body* m_borderR;
         b2Body* m_borderU;
         std::map<int, std::unique_ptr<Entity>> m_entities;
-        std::vector<std::pair<int, int>> m_damages;
+        std::vector<sf::Vector3i> m_damages;
+        bool m_restart = false;
     };
 
     class SeekEntityCallback : public b2QueryCallback {

@@ -9,7 +9,11 @@ namespace bb {
 
     class Entity {
     public:
-        Entity(World& world, int id) : m_world(world), ID(id) {
+        const int ID;
+        const enum Type {
+            PLAYER, OBJECT, ENEMY
+        } TYPE;
+        Entity(World& world, int id, int type) : m_world(world), ID(id), TYPE(Type(type)) {
         }
         virtual ~Entity() {
         }
@@ -17,8 +21,7 @@ namespace bb {
         virtual void draw(const double dt) = 0;
         virtual b2Body* getBody() = 0;
         virtual int getHp() = 0;
-        virtual void setHp(int hp) = 0;
-        const int ID;
+        virtual void setHp(int hp, int entity) = 0;
     protected:
         World& m_world;
         b2Body* m_body;

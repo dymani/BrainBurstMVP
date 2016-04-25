@@ -17,11 +17,13 @@ namespace bb {
         virtual sf::Keyboard::Key getKey() = 0;
         virtual int getHold() = 0;
         virtual int getTimeout() = 0;
+        virtual int getAp() = 0;
     protected:
         World& m_world;
         sf::Keyboard::Key m_key;
         int m_hold = -50;
         int m_timeout = -200;
+        int m_ap = 10;
     };
 }
 

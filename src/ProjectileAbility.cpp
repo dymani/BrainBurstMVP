@@ -7,8 +7,9 @@
 
 namespace bb {
     ProjectileAbility::ProjectileAbility(World& world, sf::Keyboard::Key key) : Ability(world, key) {
-        m_hold = -50;
+        m_hold = -40;
         m_timeout = -100;
+        m_ap = 20;
     }
 
     void ProjectileAbility::use(Player* player, sf::Vector2f coord) {
@@ -22,7 +23,7 @@ namespace bb {
         pCoord.x += float(0.8 * std::cos(angle * PI / 180));
         pCoord.y += float(0.8 * std::sin(angle * PI / 180));
         Projectile* projectile = new Projectile(m_world, m_world.getNewId(), pCoord.x, pCoord.y, velX,
-            velY);
+            velY, player->ID);
         m_world.addEntity(projectile);
     }
 
@@ -36,5 +37,9 @@ namespace bb {
 
     int ProjectileAbility::getTimeout() {
         return m_timeout;
+    }
+
+    int ProjectileAbility::getAp() {
+        return m_ap;
     }
 }

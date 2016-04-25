@@ -4,13 +4,14 @@
 
 namespace bb {
     BasicAbility::BasicAbility(World& world, sf::Keyboard::Key key) : Ability(world, key) {
-        m_hold = -50;
+        m_hold = -20;
         m_timeout = -100;
+        m_ap = 10;
     }
 
     void BasicAbility::use(Player* player, sf::Vector2f coord) {
         int entity = m_world.seekEntity(coord);
-        m_world.damage(entity, 10);
+        m_world.damage(player->ID, entity, 10);
     }
 
     sf::Keyboard::Key BasicAbility::getKey() {
@@ -23,5 +24,9 @@ namespace bb {
 
     int BasicAbility::getTimeout() {
         return m_timeout;
+    }
+
+    int BasicAbility::getAp() {
+        return m_ap;
     }
 }

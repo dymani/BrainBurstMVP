@@ -14,7 +14,31 @@ namespace bb {
         m_playerSprint.setPosition({10.0f, 460.0f});
         m_playerSprint.setFillColor(sf::Color(128, 128, 128));
 
+        m_hp.setPosition({10.0f, 10.0f});
+        m_hp.setSize({100.0f, 15.0f});
+        m_hp.setFillColor(sf::Color::Blue);
+
+        m_hpBar.setPosition({10.0f, 10.0f});
+        m_hpBar.setSize({100.0f, 15.0f});
+        m_hpBar.setFillColor(sf::Color(128, 0, 0));
+
+        m_ap.setPosition({10.0f, 35.0f});
+        m_ap.setSize({100.0f, 15.0f});
+        m_ap.setFillColor(sf::Color::Green);
+
+        m_apBar.setPosition({10.0f, 35.0f});
+        m_apBar.setSize({100.0f, 15.0f});
+        m_apBar.setFillColor(sf::Color(50, 50, 50));
+
+        m_bp.setCharacterSize(15);
+        m_bp.setColor(sf::Color::White);
+        m_bp.setPosition({10.0f, 60.0f});
+
         m_world.getWindow().setMouseCursorVisible(false);
+    }
+
+    void Gui::setFont(sf::Font& font) {
+        m_bp.setFont(font);
     }
 
     void Gui::handleInput() {
@@ -99,14 +123,23 @@ namespace bb {
             }
             break;
         }
+        m_hp.setSize({float(player->getHp()), 15.0f});
+        m_ap.setSize({float(player->getAp()), 15.0f});
+        m_bp.setString("BP: " + std::to_string(player->getBp()));
     }
 
     void Gui::draw(const double dt) {
-        m_world.getWindow().draw(m_cursor);
-        m_world.getWindow().draw(m_playerJump);
-        m_world.getWindow().draw(m_playerSprint);
+        auto& window = m_world.getWindow();
+        window.draw(m_playerJump);
+        window.draw(m_playerSprint);
         for(auto& ability : m_playerAbilities) {
-            m_world.getWindow().draw(ability);
+            window.draw(ability);
         }
+        window.draw(m_hpBar);
+        window.draw(m_hp);
+        window.draw(m_apBar);
+        window.draw(m_ap);
+        window.draw(m_bp);
+        window.draw(m_cursor);
     }
 }
