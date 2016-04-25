@@ -61,6 +61,18 @@ namespace bb {
         addEntity(enemy);
         enemy = new Enemy(*this, getNewId(), 3.0f, 2.5f, 1);
         addEntity(enemy);
+        enemy = new Enemy(*this, getNewId(), 10.0f, 2.5f, 2);
+        addEntity(enemy);
+        enemy = new Enemy(*this, getNewId(), 12.0f, 2.5f, 1);
+        addEntity(enemy);
+        enemy = new Enemy(*this, getNewId(), 13.0f, 0.5f, 0);
+        addEntity(enemy);
+        enemy = new Enemy(*this, getNewId(), 15.0f, 2.5f, 1);
+        addEntity(enemy);
+        enemy = new Enemy(*this, getNewId(), 17.0f, 2.5f, 1);
+        addEntity(enemy);
+        enemy = new Enemy(*this, getNewId(), 19.0f, 2.5f, 1);
+        addEntity(enemy);
     }
 
     void World::handleInput(sf::Event event) {

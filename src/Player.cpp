@@ -102,44 +102,45 @@ namespace bb {
                         m_jumpState = JS_D_JUMP;
                     }
                     break;
-            }
-            if(m_abilityState == AS_NONE) {
-                for(auto a : m_abilities) {
-                    if(event.key.code == a->getKey() && m_ap >= a->getAp()) {
-                        m_ability = std::find(m_abilities.begin(), m_abilities.end(), a) - m_abilities.begin();
-                        m_abilityState = AS_COUNT;
-                        m_abilityCount = -50;
-                        m_ap -= a->getAp();
-                        break;
+                default:
+                    if(m_abilityState == AS_NONE) {
+                        for(auto a : m_abilities) {
+                            if(event.key.code == a->getKey() && m_ap >= a->getAp()) {
+                                m_ability = std::find(m_abilities.begin(), m_abilities.end(), a)
+                                    - m_abilities.begin();
+                                m_abilityState = AS_COUNT;
+                                m_abilityCount = -50;
+                                break;
+                            }
+                        }
                     }
-                }
-            }
-        } else if(event.type == sf::Event::MouseButtonPressed) {
-            if(event.mouseButton.button == sf::Mouse::Left) {
-                auto coord = m_world.mapPixelToCoord(sf::Mouse::getPosition(m_world.getWindow()));
-                if(m_abilityState == AS_NONE) {
-                    int entity = m_world.seekEntity(coord);
-                    if(entity != -1) {
-                        m_ap += 2;
-                        m_ap = m_ap > 100 ? 100 : m_ap;
-                        double distance = std::sqrt(double(
-                            (coord.x - m_body->GetPosition().x) * (coord.x - m_body->GetPosition().x) +
-                            (coord.y - m_body->GetPosition().y) * (coord.y - m_body->GetPosition().y)));
-                        if(distance < 5)
-                            m_world.damage(ID, entity, 10);
-                    }
-                }
+                    break;
             }
         } else if(event.type == sf::Event::MouseButtonReleased) {
             if(event.mouseButton.button == sf::Mouse::Left) {
                 auto coord = m_world.mapPixelToCoord(sf::Mouse::getPosition(m_world.getWindow()));
-                if(m_abilityState == AS_USE) {
-                    m_abilities[m_ability]->use(this, coord);
-                    m_abilityState = AS_NONE;
-                    m_ability = -1;
-                    m_abilityCount = 0;
-                    m_abilityHold = 0;
-                    m_abilityTimeout = 0;
+                if(m_abilityState == AS_NONE) {
+                    int entity = m_world.seekEntity(coord);
+                    if(entity != -1 && entity != ID) {
+                        double distance = std::sqrt(double(
+                            (coord.x - m_body->GetPosition().x) * (coord.x - m_body->GetPosition().x) +
+                            (coord.y - m_body->GetPosition().y) * (coord.y - m_body->GetPosition().y)));
+                        if(distance < 2) {
+                            m_world.damage(ID, entity, 10);
+                            m_ap += 2;
+                            m_ap = m_ap > 100 ? 100 : m_ap;
+                        }
+                    }
+                } else if(m_abilityState == AS_USE) {
+                    if(m_ap > m_abilities[m_ability]->getAp()) {
+                        m_ap -= m_abilities[m_ability]->getAp();
+                        m_abilities[m_ability]->use(this, coord);
+                        m_abilityState = AS_NONE;
+                        m_ability = -1;
+                        m_abilityCount = 0;
+                        m_abilityHold = 0;
+                        m_abilityTimeout = 0;
+                    }
                 }
             }
         }
