@@ -8,6 +8,7 @@
 #include "Entity.h"
 #include "Player.h"
 #include "Enemy.h"
+#include "Object.h"
 #include "ContactListener.h"
 #include "Gui.h"
 #include "View.h"

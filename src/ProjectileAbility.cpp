@@ -7,7 +7,7 @@
 
 namespace bb {
     ProjectileAbility::ProjectileAbility(World& world, sf::Keyboard::Key key) : Ability(world, key) {
-        m_hold = -40;
+        m_hold = -10;
         m_timeout = -100;
         m_ap = 20;
     }

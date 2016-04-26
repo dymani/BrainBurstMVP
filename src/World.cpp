@@ -48,31 +48,31 @@ namespace bb {
         m_player = new Player(*this, 0);
         addEntity(m_player);
 
-        Entity* enemy;
-        enemy = new Enemy(*this, getNewId(), 8.0f, 0.5f, 0);
-        addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 5.0f, 2.5f, 0);
-        addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 8.0f, 4.5f, 0);
-        addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 5.0f, 6.5f, 0);
-        addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 8.0f, 8.5f, 0);
-        addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 3.0f, 2.5f, 1);
-        addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 10.0f, 2.5f, 2);
-        addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 12.0f, 2.5f, 1);
-        addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 13.0f, 0.5f, 0);
-        addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 15.0f, 2.5f, 1);
-        addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 17.0f, 2.5f, 1);
-        addEntity(enemy);
-        enemy = new Enemy(*this, getNewId(), 19.0f, 2.5f, 1);
-        addEntity(enemy);
+        Entity* entity;
+        entity = new Object(*this, getNewId(), 8.0f, 0.5f);
+        addEntity(entity);
+        entity = new Object(*this, getNewId(), 5.0f, 2.5f);
+        addEntity(entity);
+        entity = new Object(*this, getNewId(), 8.0f, 4.5f);
+        addEntity(entity);
+        entity = new Object(*this, getNewId(), 5.0f, 6.5f);
+        addEntity(entity);
+        entity = new Object(*this, getNewId(), 8.0f, 8.5f);
+        addEntity(entity);
+        entity = new Object(*this, getNewId(), 13.0f, 0.5f);
+        addEntity(entity);
+        entity = new Enemy(*this, getNewId(), 3.0f, 2.5f, 0);
+        addEntity(entity);
+        entity = new Enemy(*this, getNewId(), 10.0f, 2.5f, 2);
+        addEntity(entity);
+        entity = new Enemy(*this, getNewId(), 12.0f, 2.5f, 0);
+        addEntity(entity);
+        entity = new Enemy(*this, getNewId(), 15.0f, 2.5f, 1);
+        addEntity(entity);
+        entity = new Enemy(*this, getNewId(), 17.0f, 2.5f, 1);
+        addEntity(entity);
+        entity = new Enemy(*this, getNewId(), 19.0f, 2.5f, 1);
+        addEntity(entity);
     }
 
     void World::handleInput(sf::Event event) {

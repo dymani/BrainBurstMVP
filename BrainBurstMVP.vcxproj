@@ -136,6 +136,7 @@
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Gui.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\Projectile.cpp" />
     <ClCompile Include="src\ProjectileAbility.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="include\Entity.h" />
     <ClInclude Include="include\Game.h" />
     <ClInclude Include="include\Gui.h" />
+    <ClInclude Include="include\Object.h" />
     <ClInclude Include="include\Player.h" />
     <ClInclude Include="include\Projectile.h" />
     <ClInclude Include="include\ProjectileAbility.h" />

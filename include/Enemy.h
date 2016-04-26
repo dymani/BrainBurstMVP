@@ -19,7 +19,7 @@ namespace bb {
         void setHp(int hp, int entity);
     private:
         const enum EnemyType {
-            T_STATIC, T_PASSIVE , T_HOSTILE
+            T_FRIENDLY, T_PASSIVE , T_HOSTILE
         } m_type;
         sf::RectangleShape m_sprite;
         std::unique_ptr<EnemyContactListener> m_contactListener;
@@ -35,6 +35,8 @@ namespace bb {
         bool m_needJump;
         int m_jumpTimeout;
         int m_aggro, m_aggroTimeout;
+        bool m_hitLeft;
+        sf::Color m_colour;
     };
 
     class EnemyContactListener : public ContactListener {

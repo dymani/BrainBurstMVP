@@ -4,7 +4,7 @@
 
 namespace bb {
     BasicAbility::BasicAbility(World& world, sf::Keyboard::Key key) : Ability(world, key) {
-        m_hold = -20;
+        m_hold = -10;
         m_timeout = -100;
         m_ap = 10;
     }
