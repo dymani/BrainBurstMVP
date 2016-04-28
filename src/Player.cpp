@@ -1,7 +1,6 @@
 #include "Player.h"
 #include "World.h"
-#include "SkillHit.h"
-#include "SkillProjectile.h"
+#include "Skills.h"
 
 namespace bb {
     Player::Player(World& world, int id) : Entity(world, id, Entity::PLAYER) {

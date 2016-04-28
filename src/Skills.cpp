@@ -1,4 +1,4 @@
-#include "SkillProjectile.h"
+#include "Skills.h"
 #include "World.h"
 #include "Player.h"
 #include "Projectile.h"
@@ -6,9 +6,16 @@
 #define PI 3.14159265
 
 namespace bb {
+    SkillHit::SkillHit(World& world, sf::Keyboard::Key key) : Skill(world, key) {
+        m_sp = 10;
+    }
+
+    void SkillHit::use(Player* player, sf::Vector2f coord) {
+        int entity = m_world.seekEntity(coord);
+        m_world.damage(player->ID, entity, 10);
+    }
+
     SkillProjectile::SkillProjectile(World& world, sf::Keyboard::Key key) : Skill(world, key) {
-        m_hold = -10;
-        m_timeout = -100;
         m_sp = 20;
     }
 
@@ -25,21 +32,5 @@ namespace bb {
         Projectile* projectile = new Projectile(m_world, m_world.getNewId(), pCoord.x, pCoord.y, velX,
             velY, player->ID);
         m_world.addEntity(projectile);
-    }
-
-    sf::Keyboard::Key SkillProjectile::getKey() {
-        return m_key;
-    }
-
-    int SkillProjectile::getHold() {
-        return m_hold;
-    }
-
-    int SkillProjectile::getTimeout() {
-        return m_timeout;
-    }
-
-    int SkillProjectile::getSp() {
-        return m_sp;
     }
 }

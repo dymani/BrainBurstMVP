@@ -216,3 +216,4 @@ ModelManifest.xml
 /dependencies/Box2D
 /include/Box2D
 /include/Incarnate.h
+/include/IncarnateSkill.h

@@ -129,7 +129,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\SkillHit.cpp" />
     <ClCompile Include="src\ContactListener.cpp" />
     <ClCompile Include="src\Debug.cpp" />
     <ClCompile Include="src\Enemy.cpp" />
@@ -139,13 +138,14 @@
     <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\Projectile.cpp" />
-    <ClCompile Include="src\SkillProjectile.cpp" />
+    <ClCompile Include="src\Skills.cpp" />
     <ClCompile Include="src\View.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Incarnate.h" />
+    <ClInclude Include="include\IncarnateSkill.h" />
     <ClInclude Include="include\Skill.h" />
-    <ClInclude Include="include\SkillHit.h" />
     <ClInclude Include="include\ContactListener.h" />
     <ClInclude Include="include\Debug.h" />
     <ClInclude Include="include\Enemy.h" />
@@ -155,7 +155,7 @@
     <ClInclude Include="include\Object.h" />
     <ClInclude Include="include\Player.h" />
     <ClInclude Include="include\Projectile.h" />
-    <ClInclude Include="include\SkillProjectile.h" />
+    <ClInclude Include="include\Skills.h" />
     <ClInclude Include="include\View.h" />
     <ClInclude Include="include\World.h" />
   </ItemGroup>

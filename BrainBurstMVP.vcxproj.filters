@@ -48,10 +48,7 @@
     <ClCompile Include="src\Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\SkillHit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SkillProjectile.cpp">
+    <ClCompile Include="src\Skills.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -92,10 +89,13 @@
     <ClInclude Include="include\Skill.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SkillHit.h">
+    <ClInclude Include="include\Incarnate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SkillProjectile.h">
+    <ClInclude Include="include\IncarnateSkill.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Skills.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
