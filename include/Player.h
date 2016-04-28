@@ -6,6 +6,7 @@
 #include "Entity.h"
 #include "Skill.h"
 #include "ContactListener.h"
+#include "Incarnate.h"
 
 namespace bb {
     class World;
@@ -23,6 +24,7 @@ namespace bb {
         b2Body* getBody();
         int getHp();
         void setHp(int hp, int entity);
+        void setSp(int sp);
         int getSp();
         void setBp(int bp);
         int getBp();
@@ -34,6 +36,8 @@ namespace bb {
         int getSkillHold();
         int getSkillTimeout();
         std::vector<Skill*>& getSkills();
+        std::string getNewSkillText();
+        void setNewIncarnateSkill(IncarnateSkill* skill);
     private:
         sf::RectangleShape m_sprite;
         enum MoveState {
@@ -54,6 +58,12 @@ namespace bb {
         std::vector<Skill*> m_skills;
         int m_sp, m_bp;
         int m_killedBy;
+        Incarnate m_incarnate;
+        IncarnateSkill* m_newSkill;
+        enum NewSkillState {
+            NSS_NONE, NSS_CHOOSE, NSS_CHOSE
+        } m_nssState;
+        int m_nssTimeout;
     };
 
     class PlayerContactListener : public ContactListener {

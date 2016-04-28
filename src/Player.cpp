@@ -1,9 +1,11 @@
 #include "Player.h"
 #include "World.h"
 #include "Skills.h"
+#include "IncarnateSkills.h"
+#include <SFML/Window/Key.hpp>
 
 namespace bb {
-    Player::Player(World& world, int id) : Entity(world, id, Entity::PLAYER) {
+    Player::Player(World& world, int id) : Entity(world, id, Entity::PLAYER), m_incarnate(*this) {
         m_sprite.setFillColor(sf::Color::White);
         m_sprite.setSize({64.0f, 64.0f});
         m_sprite.setOrigin({32.0f, 32.0f});
@@ -51,6 +53,10 @@ namespace bb {
         m_skills.push_back(new SkillHit(m_world, sf::Keyboard::Num1));
         m_skills.push_back(new SkillProjectile(m_world, sf::Keyboard::Num2));
         m_killedBy = -1;
+
+        m_incarnate.addSkill(new IncarnateSkillTest(m_world));
+        m_incarnate.addSkill(new IncarnateSkillTrial(m_world));
+        m_nssState = NSS_NONE;
     }
 
     Player::~Player() {
@@ -58,6 +64,7 @@ namespace bb {
     }
 
     void Player::handleInput() {
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Right) || m_nssState == NSS_CHOOSE) return;
         bool keyLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::A);
         bool keyRight = sf::Keyboard::isKeyPressed(sf::Keyboard::D);
         bool keyDodge = sf::Keyboard::isKeyPressed(sf::Keyboard::S);
@@ -88,7 +95,33 @@ namespace bb {
     }
 
     void Player::handleInput(sf::Event event) {
-        if(event.type == sf::Event::KeyPressed) {
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Right) && m_nssState == NSS_NONE) {
+            if(event.type == sf::Event::TextEntered)
+                if(m_incarnate.checkInput(int(event.text.unicode))) {
+                    m_nssState = NSS_CHOOSE;
+                    if(!m_world.isPaused())
+                        m_world.togglePause();
+                }
+        } else if(m_nssState == NSS_CHOOSE) {
+            if(event.type == sf::Event::KeyPressed) {
+                switch(event.key.code) {
+                    case sf::Keyboard::Z:
+                    case sf::Keyboard::X:
+                    case sf::Keyboard::C:
+                    case sf::Keyboard::V:
+                        for(auto* skill : m_skills)
+                            if(skill->getKey() == event.key.code) return;
+                        m_newSkill->setKey(event.key.code);
+                        m_skills.push_back(m_newSkill);
+                        m_nssState = NSS_CHOSE;
+                        m_nssTimeout = 150;
+                        if(m_world.isPaused())
+                            m_world.togglePause();
+                }
+            }
+        }else if(m_world.isPaused()){
+            return;
+        } else if(event.type == sf::Event::KeyPressed) {
             switch(event.key.code) {
                 case sf::Keyboard::W:
                     if(m_jumpState == JS_STOP) {
@@ -131,7 +164,7 @@ namespace bb {
                         }
                     }
                 } else if(m_skillState == SS_USE) {
-                    if(m_sp > m_skills[m_skill]->getSp()) {
+                    if(m_sp >= m_skills[m_skill]->getSp()) {
                         m_sp -= m_skills[m_skill]->getSp();
                         m_skills[m_skill]->use(this, coord);
                         m_skillState = SS_NONE;
@@ -229,6 +262,11 @@ namespace bb {
                 }
                 break;
         }
+        if(m_nssState == NSS_CHOSE) {
+            m_nssTimeout--;
+            if(m_nssTimeout < 0)
+                m_nssState = NSS_NONE;
+        }
 
         debug.addLine("Coord:    " + std::to_string(coord.x) + " " + std::to_string(coord.y));
         debug.addLine("Velocity: " + std::to_string(vel.x) + " " + std::to_string(vel.y));
@@ -240,6 +278,7 @@ namespace bb {
             + std::to_string(m_skill) + " " + std::to_string(m_skillCount) + " "
             + std::to_string(m_skillHold) + " " + std::to_string(m_skillTimeout) + ")");
         debug.addLine("Foots:     " + std::to_string(m_numFootContacts));
+        debug.addLine("NSS: " + std::to_string(m_nssState) + " " + std::to_string(m_nssTimeout));
         if(m_hp <= 0) {
             if(m_killedBy == -1) {
                 m_bp -= 10;
@@ -277,6 +316,10 @@ namespace bb {
         m_hp = hp;
         if(m_hp <= 0)
             m_killedBy = entity;
+    }
+
+    void Player::setSp(int sp) {
+        m_sp = sp;
     }
 
     int Player::getSp() {
@@ -321,6 +364,27 @@ namespace bb {
 
     std::vector<Skill*>& Player::getSkills() {
         return m_skills;
+    }
+
+    std::string Player::getNewSkillText() {
+        std::string text;
+        switch(m_nssState) {
+            case NSS_NONE:
+                text = m_incarnate.getKeyword();
+                break;
+            case NSS_CHOOSE:
+                text = "New Skill! Choose a hotkey! Z X C V recommended\n" + m_incarnate.getKeyword();
+                break;
+            case NSS_CHOSE:
+                text = "Key " + std::string(sf::getKeyName(m_newSkill->getKey())) + " is chosen.\n"
+                    + m_incarnate.getKeyword();
+                break;
+        }
+        return text;
+    }
+
+    void Player::setNewIncarnateSkill(IncarnateSkill* skill) {
+        m_newSkill = skill;
     }
 
     PlayerContactListener::PlayerContactListener(Player& player) : m_player(player) {

@@ -6,6 +6,8 @@ namespace bb {
         m_view({960, 540}, {7.5f, 4.2f}) {
         srand(unsigned int(time(NULL)));
 
+        m_paused = false;
+
         m_font.loadFromFile("assets/system.otf");
         m_debug.init(m_font);
         m_gui.setFont(m_font);
@@ -84,7 +86,12 @@ namespace bb {
                     m_debug.toggle();
                     break;
                 case sf::Keyboard::R:
-                    m_restart = true;
+                    if(!sf::Mouse::isButtonPressed(sf::Mouse::Right))
+                        m_restart = true;
+                    break;
+                case sf::Keyboard::P:
+                    if(!sf::Mouse::isButtonPressed(sf::Mouse::Right))
+                        togglePause();
                     break;
             }
         }
@@ -96,26 +103,28 @@ namespace bb {
     }
 
     int World::update() {
-        m_debug.reset();
-        for(auto entity = m_entities.cbegin(); entity != m_entities.cend();) {
-            if(entity->second->update()) {
-                ++entity;
-            } else {
-                if(entity->first == 0) {
-                    return 1;
+        if(!m_paused) {
+            m_debug.reset();
+            for(auto entity = m_entities.cbegin(); entity != m_entities.cend();) {
+                if(entity->second->update()) {
+                    ++entity;
                 } else {
-                    m_bWorld.DestroyBody(entity->second->getBody());
-                    m_entities.erase(entity++);
+                    if(entity->first == 0) {
+                        return 1;
+                    } else {
+                        m_bWorld.DestroyBody(entity->second->getBody());
+                        m_entities.erase(entity++);
+                    }
                 }
             }
+            for(auto damage : m_damages) {
+                if(m_entities.count(damage.y) > 0)
+                    m_entities[damage.y]->setHp(m_entities[damage.y]->getHp() - damage.z, damage.x);
+            }
+            m_damages.clear();
+            m_bWorld.Step(timeStep, velocityIterations, positionIterations);
+            m_bWorld.ClearForces();
         }
-        for(auto damage : m_damages) {
-            if(m_entities.count(damage.y) > 0)
-                m_entities[damage.y]->setHp(m_entities[damage.y]->getHp() - damage.z, damage.x);
-        }
-        m_damages.clear();
-        m_bWorld.Step(timeStep, velocityIterations, positionIterations);
-        m_bWorld.ClearForces();
         m_gui.update();
         auto playerPos = m_player->getBody()->GetPosition();
         sf::Vector2f player = {playerPos.x, playerPos.y};
@@ -229,5 +238,13 @@ namespace bb {
 
     void World::addEntity(Entity* entity) {
         m_entities[entity->ID] = std::unique_ptr<Entity>(entity);
+    }
+
+    void World::togglePause() {
+        m_paused = !m_paused;
+    }
+
+    bool World::isPaused() {
+        return m_paused;
     }
 }

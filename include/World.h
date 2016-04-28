@@ -35,8 +35,11 @@ namespace bb {
         Entity* getEntity(int id);
         int getNewId();
         void addEntity(Entity* entity);
+        void togglePause();
+        bool isPaused();
     private:
         Game& m_game;
+        bool m_paused;
         float32 timeStep = 1.0F / 50.0F;
         int32 velocityIterations = 8;
         int32 positionIterations = 3;

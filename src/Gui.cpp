@@ -74,7 +74,8 @@ namespace bb {
                 int(128 - 12.7 * sprint),
                 int(128 + 12.8 * sprint),
                 int(128 + 12.8 * sprint)));
-        if(!m_abilityCreated) {
+        if(!m_abilityCreated || player->getSkills().size() != m_playerSkills.size()) {
+            m_playerSkills.clear();
             sf::RectangleShape rect;
             rect.setSize({30.0f, 30.0f});
             rect.setFillColor(sf::Color::White);
@@ -125,7 +126,7 @@ namespace bb {
         }
         m_hp.setSize({float(player->getHp()), 15.0f});
         m_sp.setSize({float(player->getSp()), 15.0f});
-        m_bp.setString("BP: " + std::to_string(player->getBp()));
+        m_bp.setString("BP: " + std::to_string(player->getBp()) + "\n" + player->getNewSkillText());
     }
 
     void Gui::draw(const double dt) {

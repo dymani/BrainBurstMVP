@@ -134,6 +134,8 @@
     <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Gui.cpp" />
+    <ClCompile Include="src\Incarnate.cpp" />
+    <ClCompile Include="src\IncarnateSkills.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\Player.cpp" />
@@ -158,6 +160,7 @@
     <ClInclude Include="include\Skills.h" />
     <ClInclude Include="include\View.h" />
     <ClInclude Include="include\World.h" />
+    <ClInclude Include="include\IncarnateSkills.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitattributes" />
