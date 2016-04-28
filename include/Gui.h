@@ -18,9 +18,9 @@ namespace bb {
         World& m_world;
         sf::RectangleShape m_cursor;
         sf::CircleShape m_playerJump, m_playerSprint;
-        std::vector<sf::RectangleShape> m_playerAbilities;
+        std::vector<sf::RectangleShape> m_playerSkills;
         sf::RectangleShape m_hp, m_hpBar;
-        sf::RectangleShape m_ap, m_apBar;
+        sf::RectangleShape m_sp, m_spBar;
         sf::Text m_bp;
         bool m_abilityCreated = false;
     };

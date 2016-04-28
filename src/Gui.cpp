@@ -22,13 +22,13 @@ namespace bb {
         m_hpBar.setSize({100.0f, 15.0f});
         m_hpBar.setFillColor(sf::Color(128, 0, 0));
 
-        m_ap.setPosition({10.0f, 35.0f});
-        m_ap.setSize({100.0f, 15.0f});
-        m_ap.setFillColor(sf::Color::Green);
+        m_sp.setPosition({10.0f, 35.0f});
+        m_sp.setSize({100.0f, 15.0f});
+        m_sp.setFillColor(sf::Color::Green);
 
-        m_apBar.setPosition({10.0f, 35.0f});
-        m_apBar.setSize({100.0f, 15.0f});
-        m_apBar.setFillColor(sf::Color(50, 50, 50));
+        m_spBar.setPosition({10.0f, 35.0f});
+        m_spBar.setSize({100.0f, 15.0f});
+        m_spBar.setFillColor(sf::Color(50, 50, 50));
 
         m_bp.setCharacterSize(15);
         m_bp.setColor(sf::Color::White);
@@ -78,53 +78,53 @@ namespace bb {
             sf::RectangleShape rect;
             rect.setSize({30.0f, 30.0f});
             rect.setFillColor(sf::Color::White);
-            for(unsigned int i = 0; i < player->getAbilities().size(); i++) {
+            for(unsigned int i = 0; i < player->getSkills().size(); i++) {
                 rect.setPosition({70.0f + i * 40, 500});
-                m_playerAbilities.push_back(rect);
+                m_playerSkills.push_back(rect);
             }
             m_abilityCreated = true;
         }
-        switch(int(player->getAbilityState())) {
+        switch(int(player->getSkillState())) {
             case 0:
                 m_cursor.setFillColor(sf::Color::White);
                 m_cursor.setSize({10.0f, 10.0f});
-                for(auto& ability : m_playerAbilities) {
+                for(auto& ability : m_playerSkills) {
                     ability.setFillColor(sf::Color::White);
                 }
                 break;
             case 1:
-                m_playerAbilities[player->getAbility()].setFillColor(sf::Color(
-                    int(255 / 50 * (player->getAbilityCount() + 50)),
+                m_playerSkills[player->getSkill()].setFillColor(sf::Color(
+                    int(255 / 50 * (player->getSkillCount() + 50)),
                     255,
-                    int(255 / 50 * (player->getAbilityCount() + 50))
+                    int(255 / 50 * (player->getSkillCount() + 50))
                 ));
                 break;
             case 2:
             {
-                int total = -player->getAbilities().at(player->getAbility())->getHold();
+                int total = -player->getSkills().at(player->getSkill())->getHold();
                 m_cursor.setFillColor(sf::Color(
-                    int(128 - 128 / total * (player->getAbilityHold() + total)),
+                    int(128 - 128 / total * (player->getSkillHold() + total)),
                     255,
-                    int(128 - 128 / total * (player->getAbilityHold() + total))
+                    int(128 - 128 / total * (player->getSkillHold() + total))
                 ));
-                m_playerAbilities[player->getAbility()].setFillColor(sf::Color::Green);
+                m_playerSkills[player->getSkill()].setFillColor(sf::Color::Green);
             }
             break;
             case 3:
             {
-                int total = -player->getAbilities().at(player->getAbility())->getTimeout();
+                int total = -player->getSkills().at(player->getSkill())->getTimeout();
                 m_cursor.setFillColor(sf::Color(
-                    int(255 / total * (player->getAbilityTimeout() + total)),
+                    int(255 / total * (player->getSkillTimeout() + total)),
                     255,
-                    int(255 / total * (player->getAbilityTimeout() + total))
+                    int(255 / total * (player->getSkillTimeout() + total))
                 ));
                 m_cursor.setSize({15.0f, 15.0f});
-                m_playerAbilities[player->getAbility()].setFillColor(sf::Color::Green);
+                m_playerSkills[player->getSkill()].setFillColor(sf::Color::Green);
             }
             break;
         }
         m_hp.setSize({float(player->getHp()), 15.0f});
-        m_ap.setSize({float(player->getAp()), 15.0f});
+        m_sp.setSize({float(player->getSp()), 15.0f});
         m_bp.setString("BP: " + std::to_string(player->getBp()));
     }
 
@@ -132,13 +132,13 @@ namespace bb {
         auto& window = m_world.getWindow();
         window.draw(m_playerJump);
         window.draw(m_playerSprint);
-        for(auto& ability : m_playerAbilities) {
+        for(auto& ability : m_playerSkills) {
             window.draw(ability);
         }
         window.draw(m_hpBar);
         window.draw(m_hp);
-        window.draw(m_apBar);
-        window.draw(m_ap);
+        window.draw(m_spBar);
+        window.draw(m_sp);
         window.draw(m_bp);
         window.draw(m_cursor);
     }

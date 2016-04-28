@@ -1,7 +1,7 @@
 #include "Player.h"
 #include "World.h"
-#include "BasicAbility.h"
-#include "ProjectileAbility.h"
+#include "SkillHit.h"
+#include "SkillProjectile.h"
 
 namespace bb {
     Player::Player(World& world, int id) : Entity(world, id, Entity::PLAYER) {
@@ -46,11 +46,11 @@ namespace bb {
         m_numFootContacts = 0;
 
         m_hp = 100;
-        m_ap = 0;
-        m_abilityState = AS_NONE;
-        m_ability = -1;
-        m_abilities.push_back(new BasicAbility(m_world, sf::Keyboard::Num1));
-        m_abilities.push_back(new ProjectileAbility(m_world, sf::Keyboard::Num2));
+        m_sp = 0;
+        m_skillState = SS_NONE;
+        m_skill = -1;
+        m_skills.push_back(new SkillHit(m_world, sf::Keyboard::Num1));
+        m_skills.push_back(new SkillProjectile(m_world, sf::Keyboard::Num2));
         m_killedBy = -1;
     }
 
@@ -73,17 +73,17 @@ namespace bb {
         else
             m_isSprinting = false;
 
-        if(m_abilityState == AS_HOLD) {
+        if(m_skillState == SS_HOLD) {
             if(!sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                m_abilityState = AS_NONE;
-                m_ability = -1;
-                m_abilityHold = 0;
+                m_skillState = SS_NONE;
+                m_skill = -1;
+                m_skillHold = 0;
             }
-        } else if(m_abilityState == AS_COUNT) {
+        } else if(m_skillState == SS_COUNT) {
             if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                m_abilityState = AS_HOLD;
-                m_abilityCount = 0;
-                m_abilityHold = m_abilities[m_ability]->getHold();
+                m_skillState = SS_HOLD;
+                m_skillCount = 0;
+                m_skillHold = m_skills[m_skill]->getHold();
             }
         }
     }
@@ -103,13 +103,13 @@ namespace bb {
                     }
                     break;
                 default:
-                    if(m_abilityState == AS_NONE) {
-                        for(auto a : m_abilities) {
-                            if(event.key.code == a->getKey() && m_ap >= a->getAp()) {
-                                m_ability = std::find(m_abilities.begin(), m_abilities.end(), a)
-                                    - m_abilities.begin();
-                                m_abilityState = AS_COUNT;
-                                m_abilityCount = -50;
+                    if(m_skillState == SS_NONE) {
+                        for(auto s : m_skills) {
+                            if(event.key.code == s->getKey() && m_sp >= s->getSp()) {
+                                m_skill = std::find(m_skills.begin(), m_skills.end(), s)
+                                    - m_skills.begin();
+                                m_skillState = SS_COUNT;
+                                m_skillCount = -50;
                                 break;
                             }
                         }
@@ -119,7 +119,7 @@ namespace bb {
         } else if(event.type == sf::Event::MouseButtonReleased) {
             if(event.mouseButton.button == sf::Mouse::Left) {
                 auto coord = m_world.mapPixelToCoord(sf::Mouse::getPosition(m_world.getWindow()));
-                if(m_abilityState == AS_NONE) {
+                if(m_skillState == SS_NONE) {
                     int entity = m_world.seekEntity(coord);
                     if(entity != -1 && entity != ID) {
                         double distance = std::sqrt(double(
@@ -127,19 +127,19 @@ namespace bb {
                             (coord.y - m_body->GetPosition().y) * (coord.y - m_body->GetPosition().y)));
                         if(distance < 2) {
                             m_world.damage(ID, entity, 10);
-                            m_ap += 2;
-                            m_ap = m_ap > 100 ? 100 : m_ap;
+                            m_sp += 2;
+                            m_sp = m_sp > 100 ? 100 : m_sp;
                         }
                     }
-                } else if(m_abilityState == AS_USE) {
-                    if(m_ap > m_abilities[m_ability]->getAp()) {
-                        m_ap -= m_abilities[m_ability]->getAp();
-                        m_abilities[m_ability]->use(this, coord);
-                        m_abilityState = AS_NONE;
-                        m_ability = -1;
-                        m_abilityCount = 0;
-                        m_abilityHold = 0;
-                        m_abilityTimeout = 0;
+                } else if(m_skillState == SS_USE) {
+                    if(m_sp > m_skills[m_skill]->getSp()) {
+                        m_sp -= m_skills[m_skill]->getSp();
+                        m_skills[m_skill]->use(this, coord);
+                        m_skillState = SS_NONE;
+                        m_skill = -1;
+                        m_skillCount = 0;
+                        m_skillHold = 0;
+                        m_skillTimeout = 0;
                     }
                 }
             }
@@ -204,29 +204,29 @@ namespace bb {
         float impulseY = m_body->GetMass() * velYChange;
         m_body->ApplyLinearImpulse(b2Vec2(impulseX, impulseY), m_body->GetWorldCenter(), true);
 
-        switch(m_abilityState) {
-            case AS_COUNT:
-                m_abilityCount++;
-                if(m_abilityCount >= 0) {
-                    m_abilityState = AS_NONE;
-                    m_ability = -1;
-                    m_abilityCount = 0;
+        switch(m_skillState) {
+            case SS_COUNT:
+                m_skillCount++;
+                if(m_skillCount >= 0) {
+                    m_skillState = SS_NONE;
+                    m_skill = -1;
+                    m_skillCount = 0;
                 }
                 break;
-            case AS_HOLD:
-                m_abilityHold++;
-                if(m_abilityHold >= 0) {
-                    m_abilityState = AS_USE;
-                    m_abilityTimeout = m_abilities[m_ability]->getTimeout();
-                    m_abilityHold = 0;
+            case SS_HOLD:
+                m_skillHold++;
+                if(m_skillHold >= 0) {
+                    m_skillState = SS_USE;
+                    m_skillTimeout = m_skills[m_skill]->getTimeout();
+                    m_skillHold = 0;
                 }
                 break;
-            case AS_USE:
-                m_abilityTimeout++;
-                if(m_abilityTimeout >= 0) {
-                    m_abilityState = AS_NONE;
-                    m_ability = -1;
-                    m_abilityTimeout = 0;
+            case SS_USE:
+                m_skillTimeout++;
+                if(m_skillTimeout >= 0) {
+                    m_skillState = SS_NONE;
+                    m_skill = -1;
+                    m_skillTimeout = 0;
                 }
                 break;
         }
@@ -237,9 +237,9 @@ namespace bb {
         debug.addLine("Jump:     " + std::to_string(m_jumpState) + " " + std::string(m_jumpState == 4
             || m_jumpTimeout > 0 ? "Not OK" : "OK"));
         debug.addLine("Sprint:    " + std::to_string(m_sprintDuration));
-        debug.addLine("Ability:   " + std::to_string(int(m_abilityState)) + " ("
-            + std::to_string(m_ability) + " " + std::to_string(m_abilityCount) + " "
-            + std::to_string(m_abilityHold) + " " + std::to_string(m_abilityTimeout) + ")");
+        debug.addLine("Ability:   " + std::to_string(int(m_skillState)) + " ("
+            + std::to_string(m_skill) + " " + std::to_string(m_skillCount) + " "
+            + std::to_string(m_skillHold) + " " + std::to_string(m_skillTimeout) + ")");
         debug.addLine("Foots:     " + std::to_string(m_numFootContacts));
         if(m_hp <= 0) {
             if(m_killedBy == -1) {
@@ -272,16 +272,16 @@ namespace bb {
 
     void Player::setHp(int hp, int entity) {
         if(hp < m_hp) {
-            m_ap += (m_hp - hp) * 2;
-            m_ap = m_ap > 100 ? 100 : m_ap;
+            m_sp += (m_hp - hp) * 2;
+            m_sp = m_sp > 100 ? 100 : m_sp;
         }
         m_hp = hp;
         if(m_hp <= 0)
             m_killedBy = entity;
     }
 
-    int Player::getAp() {
-        return m_ap;
+    int Player::getSp() {
+        return m_sp;
     }
 
     void Player::setBp(int bp) {
@@ -300,28 +300,28 @@ namespace bb {
         return m_sprintDuration;
     }
 
-    int Player::getAbilityState() {
-        return m_abilityState;
+    int Player::getSkillState() {
+        return m_skillState;
     }
 
-    int Player::getAbility() {
-        return m_ability;
+    int Player::getSkill() {
+        return m_skill;
     }
 
-    int Player::getAbilityCount() {
-        return m_abilityCount;
+    int Player::getSkillCount() {
+        return m_skillCount;
     }
 
-    int Player::getAbilityHold() {
-        return m_abilityHold;
+    int Player::getSkillHold() {
+        return m_skillHold;
     }
 
-    int Player::getAbilityTimeout() {
-        return m_abilityTimeout;
+    int Player::getSkillTimeout() {
+        return m_skillTimeout;
     }
 
-    std::vector<Ability*>& Player::getAbilities() {
-        return m_abilities;
+    std::vector<Skill*>& Player::getSkills() {
+        return m_skills;
     }
 
     PlayerContactListener::PlayerContactListener(Player& player) : m_player(player) {

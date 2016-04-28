@@ -4,7 +4,7 @@
 #include <iostream>
 #include <memory>
 #include "Entity.h"
-#include "Ability.h"
+#include "Skill.h"
 #include "ContactListener.h"
 
 namespace bb {
@@ -23,17 +23,17 @@ namespace bb {
         b2Body* getBody();
         int getHp();
         void setHp(int hp, int entity);
-        int getAp();
+        int getSp();
         void setBp(int bp);
         int getBp();
         int getJumpState();
         int getSprintDuration();
-        int getAbilityState();
-        int getAbility();
-        int getAbilityCount();
-        int getAbilityHold();
-        int getAbilityTimeout();
-        std::vector<Ability*>& getAbilities();
+        int getSkillState();
+        int getSkill();
+        int getSkillCount();
+        int getSkillHold();
+        int getSkillTimeout();
+        std::vector<Skill*>& getSkills();
     private:
         sf::RectangleShape m_sprite;
         enum MoveState {
@@ -47,12 +47,12 @@ namespace bb {
         int m_sprintDuration;
         std::unique_ptr<PlayerContactListener> m_contactListener;
         int m_contactListenerId;
-        enum AbilityState {
-            AS_NONE, AS_COUNT, AS_HOLD, AS_USE
-        } m_abilityState;
-        int m_ability, m_abilityCount, m_abilityHold, m_abilityTimeout;
-        std::vector<Ability*> m_abilities;
-        int m_ap, m_bp;
+        enum SkillState {
+            SS_NONE, SS_COUNT, SS_HOLD, SS_USE
+        } m_skillState;
+        int m_skill, m_skillCount, m_skillHold, m_skillTimeout;
+        std::vector<Skill*> m_skills;
+        int m_sp, m_bp;
         int m_killedBy;
     };
 

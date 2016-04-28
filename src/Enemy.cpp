@@ -235,7 +235,8 @@ namespace bb {
                     m_enemy.m_aggroTimeout = rand() % 300 + 500;
                 }
                 m_enemy.m_hitLeft = a->subId == 3;
-                m_enemy.m_needJump = true;
+                if(b->id != 0)
+                    m_enemy.m_needJump = true;
                 return;
             }
         }
@@ -254,7 +255,8 @@ namespace bb {
                     m_enemy.m_aggroTimeout = rand() % 300 + 500;
                 }
                 m_enemy.m_hitLeft = b->subId == 3;
-                m_enemy.m_needJump = true;
+                if(b->id != 0)
+                    m_enemy.m_needJump = true;
                 return;
             }
         }
@@ -271,7 +273,8 @@ namespace bb {
                     return;
                 }
             } else if(a->subId == 3 || a->subId == 4) {
-                m_enemy.m_needJump = false;
+                if(b->id != 0)
+                    m_enemy.m_needJump = false;
                 return;
             }
         }
@@ -285,7 +288,8 @@ namespace bb {
                     return;
                 }
             } else if(b->subId == 3 || b->subId == 4) {
-                m_enemy.m_needJump = false;
+                if(b->id != 0)
+                    m_enemy.m_needJump = false;
                 return;
             }
         }
